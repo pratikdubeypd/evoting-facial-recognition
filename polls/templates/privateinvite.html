@@ -1,0 +1,93 @@
+{% extends 'basic.html' %}
+
+{% block title %}Invite people to vote - {{privatepoll.title}}{% endblock %}
+
+{% block profileActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    {% if request.user == privatepoll.owner %}
+    <h3 class="text-center">Invite to Private poll {{privatepoll.title}}</h3>
+    <hr>
+    <h5>About this poll:</h5>
+    <div class="col-12">
+        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a>
+            and is ending on {{privatepoll.endtime}}</p>
+        <p>Description: {{privatepoll.desc}}</p>
+        <form action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
+            <div class="col-12">
+                <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
+            </div>
+        </form>
+    </div>
+    <hr>
+    <div class="col-12">
+        <h5>The people invited to the poll are:</h5>
+        <ul class="list-group">
+            {% if privateinvites %}
+            {% for p in privateinvites %}
+            {% if p.isActive %}
+            {% if p.is_accepted %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
+                <a class="btn btn-sm btn-warning" href="#" role="button">Invitation Accepted</a>
+            </li>
+            {% else %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
+                <form action="/polls/privateinvite/{{privatepoll.id}}/deleteinvite" method="POST" class="row g-3"> {% csrf_token %}
+                    <div class="col-12">
+                        <input type="hidden" id="userrevoked" name="userrevoked" value="{{p.userinvited}}">
+                        <button type="submit" name="deleteinvite" id="deleteinvite" class="btn btn-sm btn-outline-danger" value="reject">Revoke Invitation</button>
+                    </div>
+                </form>
+            </li>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+            {% else %}
+            <p>No one is invited yet :(</p>
+            {% endif %}
+        </ul>
+    </div>
+    <hr>
+    <div class="col-12">
+        <label for="useradd" class="form-label">
+            <h5>Invite users to vote for this private poll:</h5>
+        </label>
+        <input type="text" class="form-control" id="userinvite" name="userinvite" placeholder="Search usernames here...">
+        <div class="col-12 my-2" id="usershow">Users will be displayed here.</div>
+    </div>
+    {% else %}
+    <p>You are not the owner of this poll, so you cannot invite anyone :(</p>
+    {% endif %}
+    {% else %}
+    <p>Please login to access this area.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // processing usernames to be displayed
+    const data = '{{usernames}}'
+    console.log(data)
+    const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
+    console.log(rdata)
+    const input = document.getElementById('userinvite')
+    console.log(input)
+    let filteredArr = []
+    input.addEventListener('keyup', (e) => {
+        usershow.innerHTML = ""
+        filteredArr = rdata.filter(user => user['username'].includes(e.target.value))
+        console.log(filteredArr)
+        if (filteredArr.length > 0) {
+            filteredArr.map(user => {
+                usershow.innerHTML += `<form action="/polls/privatepolldetails/{{privatepoll.id}}/userinvite/" method="POST" class="row g-3">{% csrf_token %}<li class="list-group-item d-flex justify-content-between align-items-start">${user['username']}<button type="submit" name="userinvited" class="btn btn-sm btn-primary" value="${user['username']}">Send Invitation</button></li></form>`
+            })
+        } else {
+            usershow.innerHTML += `<p>No such user :(</p>`
+            filteredArr = []
+        }
+    })
+</script>
+{% endblock %}

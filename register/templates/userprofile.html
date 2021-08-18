@@ -1,0 +1,41 @@
+{% extends 'basic.html' %}
+
+{% load static %}
+
+{% block title %}User Profile - {{currentuser}}{% endblock %}
+
+{% block homeActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    <h3 class="text-center">User Profile</h3>
+    <hr>
+    <div class="row mt-5 align-items-center my-2">
+        <div class="col-md-4 text-center mb-5">
+            <div class="avatar avatar-xl">
+                <img src="{{currentuser.userprofile.head_shot.url}}" alt="{{currentuser}}"
+                    class="avatar-img rounded-circle" width="150">
+            </div>
+        </div>
+        <div class="col text-xs-center">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 class="mb-1">{{currentuser.userprofile.firstname}} {{currentuser.userprofile.lastname}}</h4>
+                    <a href="/userprofile/{{currentuser}}"><span class="badge bg-secondary">{{currentuser}}</span></a>
+                </div>
+            </div>
+            <div class="row my-2">
+                <div class="col-md-7">
+                    <h6>About {{currentuser.userprofile.firstname}}:</h6>
+                    <p class="text-muted">{{currentuser.userprofile.bio}}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    {% else %}
+    <p>Access not allowed :)</p>
+    {% endif %}
+</div>
+{% endblock %}

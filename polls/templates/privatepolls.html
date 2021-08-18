@@ -1,0 +1,107 @@
+{% extends 'basic.html' %}
+
+{% block title %}Private Polls{% endblock %}
+
+{% block profileActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    <h3 class="text-center mt-3 mb-3">Private polls list - created by you</h3>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light my-2">
+        <div class="container-fluid">
+            <a class="btn btn-sm btn-primary" href="/polls/privatepolls" role="button"><i class="fas fa-poll"></i>Refresh</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSearchSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSearchSupportedContent">
+                <ul class="navbar-nav me-auto mb-lg-0 ">
+                    <li class="nav-item dropend">
+                        <a class="btn btn-sm btn-primary dropdown-toggle m-1" href="#" id="navbarDropdown2"
+                            role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Sort by:
+                        </a>
+                        <ul class="dropdown-menu text-center" aria-labelledby="navbarDropdown2">
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'name' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?name=True" role="button"><i class="fas fa-sort-alpha-down"></i>Name</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'mostrecent' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?mostrecent=True" role="button"><i class="far fa-clock"></i>Most Recent</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'oldfirst' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?oldfirst=True" role="button"><i class="far fa-clock"></i>Oldest First</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'ending' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?ending=True" role="button"><i class="far fa-clock"></i>Ending soon</a>
+                            </li>
+                            <li class="nav-item m-2 dropend">
+                                <a class="btn btn-sm btn-{% if 'General' in request.GET %}warning{% elif 'Political' in request.GET %}warning{% elif 'Entertainment' in request.GET %}warning{% elif 'Opinion' in request.GET %}warning{% else %}outline-primary{% endif %} dropdown-toggle col-12"
+                                    href="#" id="navbarDropdown3" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    Genre
+                                </a>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                                    <li><a class="dropdown-item {% if 'General' in request.GET %}active{% endif %}"
+                                            href="?General=True">General</a></li>
+                                    <li><a class="dropdown-item {% if 'Political' in request.GET %}active{% endif %}"
+                                            href="?Political=True">Political</a></li>
+                                    <li><a class="dropdown-item {% if 'Entertainment' in request.GET %}active{% endif %}"
+                                            href="?Entertainment=True">Entertainment</a></li>
+                                    <li><a class="dropdown-item {% if 'Opinion' in request.GET %}active{% endif %}"
+                                            href="?Opinion=True">Opinion</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-outline-primary col-12" href="/polls/privatepolls" role="button"><i
+                                        class="fas fa-poll"></i>None</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <p class="{% if 'name' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Name</p>
+                        <p class="{% if 'mostrecent' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Most Recent</p>
+                        <p class="{% if 'oldfirst' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Oldest First</p>
+                        <p class="{% if 'ending' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Ending soon</p>
+                        <p class="{% if 'General' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - General</p>
+                        <p class="{% if 'Political' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Political</p>
+                        <p class="{% if 'Entertainment' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Entertainment</p>
+                        <p class="{% if 'Opinion' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Opinion</p>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                        name="search" value={{search_term}}>
+                    <button class="btn btn-sm btn-outline-success" type="submit">Search</button>
+                </form>
+                <a class="btn btn-sm btn-primary m-2" href="/polls/createpolls" role="button">Add<i
+                        class="fas fa-plus"></i></a>
+            </div>
+        </div>
+    </nav>
+    <div class="col-12">
+        <ul class="list-group">
+            {% for poll in allPrivatePolls %}
+            {% if poll.isActive %}
+            <li class="list-group-item col-12">
+                <a style="text-decoration: none; font-size: 22px;"
+                    href="/polls/privatepolldetails/{{poll.id}}">{{poll.title|truncatewords:20}}</a>
+                <p>Created by: You on {{poll.pub_date}}</p>
+                <p>Ending On: {{poll.endtime}}</p>
+                <a href="/polls/privatepolldetails/{{poll.id}}" class="btn btn-primary" role="button">See More...</a>
+                <a href="/polls/privateinvite/{{poll.id}}" class="btn btn-primary" role="button">Invite</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    Please login to access this area :)
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'basic.html' %}
+
+{% block title %}Public Poll Results - {{publicpoll.title}}{% endblock %}
+
+{% block publicPollsActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    <h3 class="text-center">Results for poll {{publicpoll.title}}</h3>
+    <hr>
+    <h5>About this poll:</h5>
+    <div class="col-12">
+        {% if request.user == publicpoll.owner %}
+        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{publicpoll.owner}}</span></a>
+            and is
+            ending on {{publicpoll.endtime}}</p>
+        {% else %}
+        <p>This poll is created by <a href="/userprofile/{{publicpoll.owner}}"><span
+                    class="badge bg-secondary">{{publicpoll.owner}}</span></a> and is ending on {{publicpoll.endtime}}
+        </p>
+        {% endif %}
+        <p>Description: {{publicpoll.desc}}</p>
+        {% if request.user == publicpoll.owner %}
+        <form action="/polls/polldetails/{{publicpoll.id}}/deletepublicpoll" method="POST" class="row g-3"> {% csrf_token %}
+            <div class="col-12">
+                <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
+            </div>
+        </form>
+        {% endif %}
+    </div>
+    <hr>
+    {% if hasVoted %}
+    <b>Results:</b>
+    <ul class="list-group">
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicpoll.choice1_vote_count > publicpoll.choice2_vote_count %}list-group-item-info{% elif publicpoll.choice1_vote_count == publicpoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            1. {{publicpoll.choice1|truncatewords:40}}...
+            <span class="badge bg-primary rounded-pill">{{publicpoll.choice1_vote_count}}</span>
+        </li>
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicpoll.choice2_vote_count > publicpoll.choice1_vote_count %}list-group-item-info{% elif publicpoll.choice1_vote_count == publicpoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            2. {{publicpoll.choice2|truncatewords:40}}...
+            <span class="badge bg-primary rounded-pill">{{publicpoll.choice2_vote_count}}</span>
+        </li>
+    </ul>
+    <div class="my-2">You have voted for {{publicvote.choice}}</div>
+    {% else %}
+    Please go back and vote to view the results.
+    {% endif %}
+    {% else %}
+    <p>Please login to access this area :)</p>
+    {% endif %}
+</div>
+{% endblock %}

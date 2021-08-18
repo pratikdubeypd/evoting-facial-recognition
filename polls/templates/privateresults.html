@@ -1,0 +1,58 @@
+{% extends 'basic.html' %}
+
+{% block title %}Private Poll Results - {{privatepoll.title}}{% endblock %}
+
+{% block profileActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    {% if request.user == privatepoll.owner or hasAccess %}
+    <h3 class="text-center">Private poll name: {{privatepoll.title}}</h3>
+    <hr>
+    <h5>About this poll:</h5>
+    <div class="col-12">
+        {% if request.user == privatepoll.owner %}
+        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a>
+            and is ending on {{privatepoll.endtime}}</p>
+        <p>Description: {{privatepoll.desc}}</p>
+        <form action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
+            <div class="col-12">
+                <a href="/polls/privateinvite/{{privatepoll.id}}" class="btn btn-primary" role="button">Invite</a>
+                <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
+            </div>
+        </form>
+        {% elif hasAccess %}
+        <p>This poll is created by <a href="/userprofile/{{privatepoll.owner}}"><span
+                    class="badge bg-secondary">{{privatepoll.owner}}</span></a> and is ending on {{privatepoll.endtime}}
+        </p>
+        <p>Description: {{privatepoll.desc}}</p>
+        {% endif %}
+    </div>
+    <hr>
+    {% if hasVoted %}
+    <b>Results:</b>
+    <ul class="list-group">
+        <li
+            class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice1_vote_count > privatepoll.choice2_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            1. {{privatepoll.choice1|truncatewords:40}}...
+            <span class="badge bg-primary rounded-pill">{{privatepoll.choice1_vote_count}}</span>
+        </li>
+        <li
+            class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice2_vote_count > privatepoll.choice1_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            2. {{privatepoll.choice2|truncatewords:40}}...
+            <span class="badge bg-primary rounded-pill">{{privatepoll.choice2_vote_count}}</span>
+        </li>
+    </ul>
+    <div class="my-2">You have voted for {{privatevote.choice|truncatewords:30}}...</div>
+    {% else %}
+    Please go back and vote to view this page.
+    {% endif %}
+    {% else %}
+    <p>You are not the owner of this poll.</p>
+    {% endif %}
+    {% else %}
+    <p>Please login to access this area :)</p>
+    {% endif %}
+</div>
+{% endblock %}

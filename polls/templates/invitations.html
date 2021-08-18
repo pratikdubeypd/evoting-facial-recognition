@@ -1,0 +1,97 @@
+{% extends 'basic.html' %}
+
+{% block title %}Private Poll Invitations{% endblock %}
+
+{% block profileActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if user.is_authenticated %}
+    <h3 class="text-center mt-3 mb-3">Your Private Invitations</h3>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light my-2">
+        <div class="container-fluid">
+            <a class="btn btn-sm btn-primary" href="/polls/invitations" role="button"><i
+                    class="fas fa-poll"></i>Refresh</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent2">
+                <ul class="navbar-nav me-auto mb-lg-0 ">
+                    <li class="nav-item dropend">
+                        <a class="btn btn-sm btn-primary dropdown-toggle m-1" href="#" id="navbarDropdown2"
+                            role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                            Sort by:
+                        </a>
+                        <ul class="dropdown-menu text-center" aria-labelledby="navbarDropdown2">
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'latest' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?latest=True" role="button"><i class="fas fa-sort-alpha-down"></i>Latest</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'oldest' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?oldest=True" role="button"><i class="far fa-clock"></i>Oldest First</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-{% if 'name' in request.GET %}warning{% else %}outline-primary{% endif %} col-12"
+                                    href="?name=True" role="button"><i class="far fa-clock"></i>Name</a>
+                            </li>
+                            <li class="nav-item m-2">
+                                <a class="btn btn-sm btn-outline-primary col-12" href="/polls/invitations" role="button"><i
+                                        class="fas fa-poll"></i>None</a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <p class="{% if 'latest' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Latest</p>
+                        <p class="{% if 'oldest' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Oldest First</p>
+                        <p class="{% if 'name' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Name
+                        </p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="col-12">
+        <ul class="list-group">
+            {% for invites in invitations %}
+            {% if invites.isActive %}
+            {% if invites.poll.isActive and request.user != invites.poll.owner %}
+            <li class="list-group-item col-12">
+                <p style="text-decoration: none; font-size: 22px;">Title: {{invites.poll.title|truncatewords:20}}</p>
+                <p>Created by <a href="/userprofile/{{invites.poll.owner}}"><span class="badge bg-secondary">
+                            {{invites.poll.owner}}</span></a> on {{invites.poll.pub_date}} and is ending on:
+                    {{invites.poll.endtime}}
+                </p>
+                <p>Notification received on: {{invites.created}}</p>
+                {% if invites.is_accepted %}
+                <b>You've accepted this invite!</b>
+                <br>
+                <a class="btn btn-outline-primary my-2" href="/polls/invitations/acceptedinvites" role="button">View
+                    accepted invitations</a>
+                <a class="btn btn-danger" href="#" role="button">Delete notification</a>
+                {% else %}
+                <form action="/polls/invitations/{{invites.poll.id}}/invitechoice" method="POST" class="row g-3"> {% csrf_token %}
+                    <div class="col-12">
+                        <button type="submit" name="invitechoice" id="accept" class="btn btn-outline-success"
+                            value="accept">Accept</button>
+                        <button type="submit" name="invitechoice" id="reject" class="btn btn-outline-danger"
+                            value="reject">Reject</button>
+                    </div>
+                </form>
+                {% endif %}
+            </li>
+            <hr>
+            {% endif %}
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% else %}
+    <p>Please login to access this area.</p>
+    {% endif %}
+</div>
+{% endblock %}

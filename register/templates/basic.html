@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="https://www.graphicpie.com/wp-content/uploads/2020/11/cyan-among-us-character.png">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>{% block title %} {% endblock %}</title>
+    <style>
+        /* body padding for fixed navbar */
+        body {
+            padding-top: 3.6rem;
+        }
+
+        /* container class minimum height */
+        .main {
+            min-height: 80vh;
+        }
+
+        /* mobile view of profile */
+        @media (max-width: 768px) {
+            .text-xs-center {
+                text-align: center;
+            }
+        }
+
+        /* mobile view for home page */
+        @media (min-width: 768px) {
+            .margin-home {
+                margin-left: 10rem;
+                margin-right: 10rem;
+            }
+        }
+
+        /* hide scrollbar */
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE and Edge */
+        body {
+            -ms-overflow-style: none;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">iVote</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link {% block homeActive %}{% endblock %}" aria-current="page" href="/">Home</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link {% block publicPollsActive %}{% endblock %}" href="/polls/publicpolls">Public
+                            Polls</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% block acceptedActive %}{% endblock %}"
+                            href="/polls/invitations/acceptedinvites">Accepted Invites</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {% block aboutActive %}{% endblock %}" href="/about">About Us</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {% block contactActive %}{% endblock %}" href="/contact">Contact Us</a>
+                    </li>
+                </ul>
+                {% if user.is_authenticated %}
+                <ul class="navbar-nav ml-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {% block profileActive %}{% endblock %}" href="#"
+                            id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Welcome {{request.user}}
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                            <li><a class="dropdown-item" href="/polls/createpolls">Create Polls</a></li>
+                            <li><a class="dropdown-item" href="/polls/privatepolls">My Private Polls</a></li>
+                            <li><a class="dropdown-item" href="/polls/invitations">Invitations</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="/logout">Logout</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                {% else %}
+                <a href="/login" class="btn btn-outline-light mx-2" role="button">Login</a>
+                <a href="/signup" class="btn btn-outline-light" role="button">Signup</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    {% for message in messages %}
+    <div class="alert alert-{{message.tags}} mb-0 alert-dismissible fade show" role="alert">
+        <strong>Message: </strong> {{message}}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+
+    {% block body %}{% endblock %}
+
+    <footer class="footer mt-auto pt-3 bg-dark text-white">
+        <div class="container">
+            <div class="row mt-2 text-xs-center">
+                <div class="col-md-4">
+                    <a class="d-inline-flex align-items-center mb-2 link-dark text-decoration-none" href="/"
+                        aria-label="Bootstrap">
+                        <img src="https://www.graphicpie.com/wp-content/uploads/2020/11/cyan-among-us-character.png"
+                            width="50" height="60" class="d-block me-2">
+                        <h4 class="my-1 text-white">iVote</h4>
+                    </a>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">Create and customize polls according to your needs.</li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-4">
+                    <h5>Links</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a class="text-decoration-none link-warning" href="/">Home</a></li>
+                        <li class="mb-2"><a class="text-decoration-none link-warning" target="_blank"
+                                href="https://github.com/pratikdubeypd/e-voting-facial-recognition">Github Repo</a></li>
+                    </ul>
+                </div>
+                <div class="col-6 col-md-4">
+                    <h5>Help & Support</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a class="text-decoration-none link-warning" href="/contact">Contact Us</a>
+                        </li>
+                        <li class="mb-2"><a class="text-decoration-none link-warning" href="/about">About Us</a></li>
+                    </ul>
+                </div>
+                <div class="col-12 text-center my-3">
+                    <ul class="list-unstyled">
+                        <li>Designed and built by <a class="text-decoration-none link-warning"
+                                href="/about">Team No. 22</a> !</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    {% block script %}{% endblock %}
+
+    <!-- Optional JavaScript; choose one of the two! -->
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+
+    <!-- Option 2: Separate Popper and Bootstrap JS -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    -->
+</body>
+
+</html>
