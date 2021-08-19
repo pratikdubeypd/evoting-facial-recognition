@@ -8,13 +8,12 @@
 
 {% block body %}
 <div class="container my-3 main">
-    {% if user.is_authenticated %}
     <h3 class="text-center">User Profile</h3>
     <hr>
     <div class="row mt-5 align-items-center my-2">
         <div class="col-md-4 text-center mb-5">
             <div class="avatar avatar-xl">
-                <img src="{{currentuser.userprofile.head_shot.url}}" alt="{{currentuser}}"
+                <img src="{{currentuser.userprofile.head_shot.url}}" alt="Profile image of {{currentuser}}"
                     class="avatar-img rounded-circle" width="150">
             </div>
         </div>
@@ -34,8 +33,5 @@
         </div>
     </div>
     <hr>
-    {% else %}
-    <p>Access not allowed :)</p>
-    {% endif %}
 </div>
 {% endblock %}

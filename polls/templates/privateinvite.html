@@ -6,16 +6,16 @@
 
 {% block body %}
 <div class="container my-3 main">
-    {% if user.is_authenticated %}
-    {% if request.user == privatepoll.owner %}
     <h3 class="text-center">Invite to Private poll {{privatepoll.title}}</h3>
     <hr>
-    <h5>About this poll:</h5>
     <div class="col-12">
-        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a>
-            and is ending on {{privatepoll.endtime}}</p>
-        <p>Description: {{privatepoll.desc}}</p>
-        <form action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
+        <h6>About this poll:</h6>
+        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}}
+            and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}</p>
+        <h6>Description:</h6>
+        <p>{{privatepoll.desc}}</p>
+        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3">
+            {% csrf_token %}
             <div class="col-12">
                 <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
             </div>
@@ -34,7 +34,8 @@
             </li>
             {% else %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
-                <form action="/polls/privateinvite/{{privatepoll.id}}/deleteinvite" method="POST" class="row g-3"> {% csrf_token %}
+                <form onSubmit="return confirm('Are you sure you wish to revoke this invitation?');" action="/polls/privateinvite/{{privatepoll.id}}/deleteinvite" method="POST" class="row g-3">
+                    {% csrf_token %}
                     <div class="col-12">
                         <input type="hidden" id="userrevoked" name="userrevoked" value="{{p.userinvited}}">
                         <button type="submit" name="deleteinvite" id="deleteinvite" class="btn btn-sm btn-outline-danger" value="reject">Revoke Invitation</button>
@@ -55,14 +56,8 @@
             <h5>Invite users to vote for this private poll:</h5>
         </label>
         <input type="text" class="form-control" id="userinvite" name="userinvite" placeholder="Search usernames here...">
-        <div class="col-12 my-2" id="usershow">Users will be displayed here.</div>
+        <div class="col-12 my-2" id="usershow"><p>Users will be displayed here.</p></div>
     </div>
-    {% else %}
-    <p>You are not the owner of this poll, so you cannot invite anyone :(</p>
-    {% endif %}
-    {% else %}
-    <p>Please login to access this area.</p>
-    {% endif %}
 </div>
 {% endblock %}
 
@@ -70,16 +65,12 @@
 <script>
     // processing usernames to be displayed
     const data = '{{usernames}}'
-    console.log(data)
     const rdata = JSON.parse(data.replace(/&quot;/g, '"'))
-    console.log(rdata)
     const input = document.getElementById('userinvite')
-    console.log(input)
     let filteredArr = []
     input.addEventListener('keyup', (e) => {
         usershow.innerHTML = ""
         filteredArr = rdata.filter(user => user['username'].includes(e.target.value))
-        console.log(filteredArr)
         if (filteredArr.length > 0) {
             filteredArr.map(user => {
                 usershow.innerHTML += `<form action="/polls/privatepolldetails/{{privatepoll.id}}/userinvite/" method="POST" class="row g-3">{% csrf_token %}<li class="list-group-item d-flex justify-content-between align-items-start">${user['username']}<button type="submit" name="userinvited" class="btn btn-sm btn-primary" value="${user['username']}">Send Invitation</button></li></form>`
@@ -87,6 +78,9 @@
         } else {
             usershow.innerHTML += `<p>No such user :(</p>`
             filteredArr = []
+        }
+        if (e.target.value == ""){
+            usershow.innerHTML = `<p>Users will be displayed here.</p>`
         }
     })
 </script>

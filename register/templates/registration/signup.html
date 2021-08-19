@@ -9,50 +9,51 @@
     {% else %}
     <h3 class="text-center">Welcome! Signup to iVote</h3>
     <hr>
-    <form action="/signuphandler/" method="POST" enctype="multipart/form-data" class="row g-3"> {% csrf_token %}
+    <form action="/signup/" method="POST" enctype="multipart/form-data" class="row g-3"> {% csrf_token %}
         <div class="col-md-6">
-            <label for="fname" class="form-label">First Name</label>
+            <label for="fname" class="form-label">First Name:</label>
             <input type="text" class="form-control" name="fname" id="fname" placeholder="Enter your first name"
                 required>
         </div>
         <div class="col-md-6">
-            <label for="lname" class="form-label">Last Name</label>
+            <label for="lname" class="form-label">Last Name:</label>
             <input type="text" class="form-control" name="lname" id="lname" placeholder="Enter your last name" required>
         </div>
         <div class="col-md-6">
-            <label for="email" class="form-label">Email</label>
+            <label for="email" class="form-label">Email:</label>
             <input type="email" class="form-control" name="email" id="email" placeholder="Enter your email" required>
         </div>
         <div class="col-md-6">
-            <label for="phone" class="form-label">Phone Number</label>
+            <label for="phone" class="form-label">Phone Number:</label>
             <input type="tel" class="form-control" name="phone" pattern="[0-9]{10}"
                 placeholder="Enter your phone number">
         </div>
         <div class="col-12">
-            <label for="username" class="form-label">Username</label>
+            <label for="username" class="form-label">Username:</label>
+            <br>
+            <b style="font-size: 12px;">(Note: You cannot change your username again.)</b>
             <input type="text" class="form-control" name="username" id="username"
                 placeholder="Choose a unique Username (Lowercase and AlphaNumeric)" required>
         </div>
         <div class="col-md-6">
-            <label for="pass1" class="form-label">Password</label>
+            <label for="pass1" class="form-label">Password:</label>
             <input type="password" class="form-control" name="pass1" id="pass1" placeholder="Enter a strong password"
                 required>
         </div>
         <div class="col-md-6">
-            <label for="pass2" class="form-label">Confirm Password</label>
+            <label for="pass2" class="form-label">Confirm Password:</label>
             <input type="password" class="form-control" name="pass2" id="pass2" placeholder="Enter your password again"
                 required>
         </div>
         <div class="col-md-6">
-            <label for="image" class="form-label">Profile Image</label>
+            <label for="image" class="form-label">Profile Image:</label>
             <br>
-            <b style="font-size: 12px;">(Note: This image will be used for future verification, please upload a passport sized recent
-                image.)</b>
+            <b style="font-size: 12px;">(Note: This image will be used for future verification/authentication, please upload a recent passport sized image.)</b>
             <input type="file" class="form-control" name="image" id="image" accept="image/*" required>
         </div>
         <div class="col-12">
-            <label for="bio" class="form-label">Bio</label>
-            <textarea class="form-control" id="bio" name="bio" rows="2"></textarea>
+            <label for="bio" class="form-label">Bio:</label>
+            <textarea class="form-control" id="bio" name="bio" rows="3"></textarea>
           </div>
         <div class="col-12">
             <button type="submit" class="btn btn-primary">Signup</button>

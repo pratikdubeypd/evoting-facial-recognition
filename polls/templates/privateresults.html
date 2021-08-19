@@ -6,27 +6,27 @@
 
 {% block body %}
 <div class="container my-3 main">
-    {% if user.is_authenticated %}
-    {% if request.user == privatepoll.owner or hasAccess %}
     <h3 class="text-center">Private poll name: {{privatepoll.title}}</h3>
     <hr>
-    <h5>About this poll:</h5>
     <div class="col-12">
+        <h6>About this poll:</h6>
         {% if request.user == privatepoll.owner %}
-        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a>
-            and is ending on {{privatepoll.endtime}}</p>
-        <p>Description: {{privatepoll.desc}}</p>
-        <form action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
+        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}}
+            and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.</p>
+        <h6>Description:</h6>
+        <p>{{privatepoll.desc}}</p>
+        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
             <div class="col-12">
                 <a href="/polls/privateinvite/{{privatepoll.id}}" class="btn btn-primary" role="button">Invite</a>
                 <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
             </div>
         </form>
-        {% elif hasAccess %}
+        {% else %}
         <p>This poll is created by <a href="/userprofile/{{privatepoll.owner}}"><span
-                    class="badge bg-secondary">{{privatepoll.owner}}</span></a> and is ending on {{privatepoll.endtime}}
+                    class="badge bg-secondary">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}} and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.
         </p>
-        <p>Description: {{privatepoll.desc}}</p>
+        <h6>Description:</h6>
+        <p>{{privatepoll.desc}}</p>
         {% endif %}
     </div>
     <hr>
@@ -35,24 +35,59 @@
     <ul class="list-group">
         <li
             class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice1_vote_count > privatepoll.choice2_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
-            1. {{privatepoll.choice1|truncatewords:40}}...
+            1. {{privatepoll.choice1}}...
             <span class="badge bg-primary rounded-pill">{{privatepoll.choice1_vote_count}}</span>
         </li>
         <li
             class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice2_vote_count > privatepoll.choice1_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
-            2. {{privatepoll.choice2|truncatewords:40}}...
+            2. {{privatepoll.choice2}}...
             <span class="badge bg-primary rounded-pill">{{privatepoll.choice2_vote_count}}</span>
         </li>
     </ul>
-    <div class="my-2">You have voted for {{privatevote.choice|truncatewords:30}}...</div>
+    <div class="my-2">You have voted for {{privatevote.choice|truncatewords:100}}</div>
     {% else %}
-    Please go back and vote to view this page.
+    <p>Please go back and vote to see the results.</p>
     {% endif %}
-    {% else %}
-    <p>You are not the owner of this poll.</p>
-    {% endif %}
-    {% else %}
-    <p>Please login to access this area :)</p>
-    {% endif %}
+    <hr>
+    <div class="col">
+        <div class="card rounded-3 shadow-sm">
+            <div class="card-body text-center">
+                <ul class="list-unstyled">
+                    <h6>The poll is ending in:</h6>
+                    <li id="countdown-box">
+                        <div class="spinner-border" role="status"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const countdownbox = document.getElementById('countdown-box')
+    const end = '{{privatepoll.endtime|date:"d M, Y H:m:s"}}'
+    // obtaining the countdown time in milliseconds
+    const endDate = Date.parse(end)
+    const pollcountdown = setInterval(() => {
+        // obtaining current time in milliseconds every second
+        const now = new Date().getTime()
+        // calculating the difference between expiration and current time every second
+        const diff = endDate - now
+        // converting the difference from milliseconds to days, hours, mins and secs
+        const days = Math.floor((endDate / (1000 * 60 * 60 * 24)) - (now / (1000 * 60 * 60 * 24)))
+        const hours = Math.floor(((endDate / (1000 * 60 * 60)) - (now / (1000 * 60 * 60))) % 24)
+        const mins = Math.floor(((endDate / (1000 * 60)) - (now / (1000 * 60))) % 60)
+        const secs = Math.floor(((endDate / (1000)) - (now / (1000))) % 60)
+        if (diff > 0) {
+            countdownbox.innerHTML = days + " days, " + hours + " hours, " + mins + " minutes, " + secs + " seconds."
+        }
+        else {
+            clearInterval(pollcountdown)
+            countdownbox.innerHTML = "The poll has ended!"
+        }
+    }, 1000)
+
+</script>
 {% endblock %}

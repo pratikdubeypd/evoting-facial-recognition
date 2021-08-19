@@ -6,7 +6,6 @@
 
 {% block body %}
 <div class="container my-3 main">
-    {% if user.is_authenticated %}
     <h3 class="text-center">Create a Poll</h3>
     <hr>
     <form action="/polls/createpublicpoll/" method="POST" class="row g-3" id="createpoll"> {% csrf_token %}
@@ -51,9 +50,6 @@
             <button type="submit" id="createbutton" class="btn btn-primary">Create Poll</button>
         </div>
     </form>
-    {% else %}
-    Access not allowed :)
-    {% endif %}
 </div>
 {% endblock %}
 

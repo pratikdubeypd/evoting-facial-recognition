@@ -130,3 +130,5 @@ MEDIA_ROOT =os.path.join(BASE_DIR,'register/media')
 MESSAGE_TAGS = {
     messages.ERROR: 'danger'
 }
+
+LOGIN_URL = '/login'
