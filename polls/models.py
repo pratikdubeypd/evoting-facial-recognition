@@ -9,18 +9,13 @@ class Publicpoll(models.Model):
     title = models.CharField(max_length=400)
     desc=models.TextField(default="")
     pub_date = models.DateTimeField(default=timezone.now)
-    choice1 = models.CharField(max_length=300, default="")
-    choice2 = models.CharField(max_length=300, default="")
+    choice1 = models.CharField(max_length=500, default="")
+    choice2 = models.CharField(max_length=500, default="")
     choice1_vote_count = models.IntegerField(default=0)
     choice2_vote_count = models.IntegerField(default=0)
     genre = models.CharField(max_length=100, default="General")
     endtime = models.DateTimeField()
     isActive = models.BooleanField(default=True)
-
-    # to complete this function
-    def refresh(self):
-        if self.endtime == timezone.now:
-            self.isActive = False
 
     def __str__(self):
         return self.title
@@ -29,22 +24,17 @@ class Publicpoll(models.Model):
 class Privatepoll(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=200)
+    title = models.CharField(max_length=400)
     desc=models.TextField(default="")
     pub_date = models.DateTimeField(default=timezone.now)
-    choice1 = models.CharField(max_length=300, default="")
-    choice2 = models.CharField(max_length=300, default="")
+    choice1 = models.CharField(max_length=500, default="")
+    choice2 = models.CharField(max_length=500, default="")
     choice1_vote_count = models.IntegerField(default=0)
     choice2_vote_count = models.IntegerField(default=0)
     genre = models.CharField(max_length=100, default="General")
     endtime = models.DateTimeField()
     isActive = models.BooleanField(default=True)
     userAccess = models.TextField(default="")
-
-    # to complete this function
-    def refresh(self):
-        if self.endtime == timezone.now:
-            self.isActive = False
 
     def __str__(self):
         return f'{self.title} by {self.owner}'

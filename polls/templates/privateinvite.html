@@ -6,7 +6,7 @@
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center">Invite to Private poll {{privatepoll.title}}</h3>
+    <h3 class="text-center">Invite to Private Poll {{privatepoll.title}}</h3>
     <hr>
     <div class="col-12">
         <h6>About this poll:</h6>
@@ -27,7 +27,6 @@
         <ul class="list-group">
             {% if privateinvites %}
             {% for p in privateinvites %}
-            {% if p.isActive %}
             {% if p.is_accepted %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
                 <a class="btn btn-sm btn-warning" href="#" role="button">Invitation Accepted</a>
@@ -42,7 +41,6 @@
                     </div>
                 </form>
             </li>
-            {% endif %}
             {% endif %}
             {% endfor %}
             {% else %}

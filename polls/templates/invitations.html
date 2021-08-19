@@ -4,6 +4,8 @@
 
 {% block profileActive %}active{% endblock %}
 
+{% load polls_extras %}
+
 {% block body %}
 <div class="container my-3 main">
     <h3 class="text-center mt-3 mb-3">Your Private Invitations</h3>
@@ -66,10 +68,33 @@
             </div>
         </div>
     </nav>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if invitations.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="{% my_url invitations.previous_page_number 'page' request.GET.urlencode %}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled"><a class="page-link text-dark" href="#" tabindex="-1" aria-disabled="true">Page {{invitations.number}} of {{invitations.paginator.num_pages}}</a></li>
+            {% if invitations.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{% my_url invitations.next_page_number 'page' request.GET.urlencode %}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
     <div class="col-12">
         <ul class="list-group">
             {% for invites in invitations %}
-            {% if invites.isActive and invites.poll.isActive %}
+            {% if invites.poll.isActive %}
             <li class="list-group-item col-12">
                 <p style="text-decoration: none; font-size: 22px;">Title: {{invites.poll.title}}</p>
                 <p>Created by <a href="/userprofile/{{invites.poll.owner}}"><span class="badge bg-secondary">

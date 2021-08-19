@@ -4,12 +4,15 @@
 
 {% block publicPollsActive %}active{% endblock %}
 
+{% load polls_extras %}
+
 {% block body %}
 <div class="container my-3 main">
     <h3 class="text-center mt-3 mb-3">Public polls list</h3>
     <nav class="navbar navbar-expand-lg navbar-light bg-light my-2">
         <div class="container-fluid">
-            <a class="btn btn-sm btn-primary" href="/polls/publicpolls" role="button"><i class="fas fa-poll"></i>Refresh</a>
+            <a class="btn btn-sm btn-primary" href="/polls/publicpolls" role="button"><i
+                    class="fas fa-poll"></i>Refresh</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent2" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -61,21 +64,30 @@
                                     href="?byyou=True" role="button"><i class="far fa-clock"></i>Created by you</a>
                             </li>
                             <li class="nav-item m-2">
-                                <a class="btn btn-sm btn-outline-primary col-12" href="/polls/publicpolls" role="button"><i
-                                        class="fas fa-poll"></i>None</a>
+                                <a class="btn btn-sm btn-outline-primary col-12" href="/polls/publicpolls"
+                                    role="button"><i class="fas fa-poll"></i>None</a>
                             </li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <p class="{% if 'name' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Name</p>
-                        <p class="{% if 'mostrecent' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Most Recent</p>
-                        <p class="{% if 'oldfirst' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Oldest First</p>
-                        <p class="{% if 'ending' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Ending soon</p>
-                        <p class="{% if 'byyou' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Created by you</p>
-                        <p class="{% if 'General' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - General</p>
-                        <p class="{% if 'Political' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Political</p>
-                        <p class="{% if 'Entertainment' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Entertainment</p>
-                        <p class="{% if 'Opinion' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Genre - Opinion</p>
+                        <p class="{% if 'name' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by: Name
+                        </p>
+                        <p class="{% if 'mostrecent' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Most Recent</p>
+                        <p class="{% if 'oldfirst' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Oldest First</p>
+                        <p class="{% if 'ending' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Ending soon</p>
+                        <p class="{% if 'byyou' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Created by you</p>
+                        <p class="{% if 'General' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Genre - General</p>
+                        <p class="{% if 'Political' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Genre - Political</p>
+                        <p class="{% if 'Entertainment' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted
+                            by: Genre - Entertainment</p>
+                        <p class="{% if 'Opinion' in request.GET %}d-block{% else %}d-none{% endif %} m-2">Sorted by:
+                            Genre - Opinion</p>
                     </li>
                 </ul>
                 <form class="d-flex">
@@ -88,25 +100,49 @@
             </div>
         </div>
     </nav>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if allPublicPolls.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="{% my_url allPublicPolls.previous_page_number 'page' request.GET.urlencode %}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled"><a class="page-link text-dark" href="#" tabindex="-1" aria-disabled="true">Page {{allPublicPolls.number}} of {{allPublicPolls.paginator.num_pages}}</a></li>
+            {% if allPublicPolls.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{% my_url allPublicPolls.next_page_number 'page' request.GET.urlencode %}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
     <div class="col-12">
         <ul class="list-group">
             {% for poll in allPublicPolls %}
-            {% if poll.isActive %}
             <li class="list-group-item col-12">
                 <p><a style="text-decoration: none; font-size: 22px;"
-                    href="/polls/polldetails/{{poll.id}}">{{poll.title|truncatewords:50}}</a></p>
+                        href="/polls/polldetails/{{poll.id}}">{{poll.title|truncatewords:50}}</a></p>
                 {% if request.user == poll.owner %}
-                <p>Created by You <a href="/profile"><span class="badge bg-info">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}</p>
+                <p>Created by You <a href="/profile"><span class="badge bg-info">{{poll.owner}}</span></a> on
+                    {{poll.pub_date|date:"d M, Y H:m"}}</p>
                 {% else %}
                 <p>Created by <a href="/userprofile/{{poll.owner}}"><span
-                            class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}</p>
+                            class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}
+                </p>
                 {% endif %}
                 <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}</p>
                 <a href="/polls/polldetails/{{poll.id}}" class="btn btn-primary" role="button">See More...</a>
             </li>
-            {% endif %}
             {% endfor %}
         </ul>
     </div>
 </div>
 {% endblock %}
+<!-- ?page={{ allPublicPolls.next_page_number }} -->

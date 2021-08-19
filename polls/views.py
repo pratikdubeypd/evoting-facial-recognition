@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, HttpResponse
 from django.contrib import messages
 import datetime
+from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.db.models.functions import Lower
 from .models import Publicpoll, Privatepoll, Publicvote, Privatevote, Privateinvite
@@ -21,7 +22,7 @@ def pollshome(request):
 @login_required
 def publicPolls(request):
     publicrefresh()
-    allPublicPolls = Publicpoll.objects.all()
+    allPublicPolls = Publicpoll.objects.filter(isActive=True)
     search_term = ''
     if 'name' in request.GET:
         allPublicPolls = allPublicPolls.order_by(Lower('title'))
@@ -47,14 +48,17 @@ def publicPolls(request):
             title__icontains=search_term)
         allPublicPollsdesc = allPublicPolls.filter(desc__icontains=search_term)
         allPublicPolls = allPublicPollstitle.union(allPublicPollsdesc)
-    dict = {'allPublicPolls': allPublicPolls, 'search_term': search_term}
+    paginated_publicpolls = Paginator(allPublicPolls, 4)
+    page_number = request.GET.get('page')
+    poll_page_obj = paginated_publicpolls.get_page(page_number)
+    dict = {'allPublicPolls': poll_page_obj, 'search_term': search_term}
     return render(request, 'publicpolls.html', dict)
 
 
 @login_required
 def privatePolls(request):
     privaterefresh()
-    allPrivatePolls = Privatepoll.objects.filter(owner=request.user)
+    allPrivatePolls = Privatepoll.objects.filter(owner=request.user, isActive=True)
     if allPrivatePolls is not None:
         search_term = ''
         if 'name' in request.GET:
@@ -81,7 +85,10 @@ def privatePolls(request):
                 desc__icontains=search_term)
             allPrivatePolls = allPrivatePollstitle.union(
                 allPrivatePollsdesc)
-        dict = {'allPrivatePolls': allPrivatePolls,
+        paginated_privatepolls = Paginator(allPrivatePolls, 4)
+        page_number = request.GET.get('page')
+        poll_page_obj = paginated_privatepolls.get_page(page_number)
+        dict = {'allPrivatePolls': poll_page_obj,
                 'search_term': search_term}
         return render(request, 'privatepolls.html', dict)
     else:
@@ -135,24 +142,23 @@ def createPublicPoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
-        if len(title) > 200:
+        if len(title) > 400:
             messages.error(
-                request, 'Your title must be under 200 characters')
+                request, 'Your title must be under 400 characters!')
             return render(request, 'createpolls.html')
-        if len(desc) > 500:
+        if len(desc) > 1000:
             messages.error(
-                request, 'Your description must be under 500 characters')
+                request, 'Your description must be under 1000 characters!')
             return render(request, 'createpolls.html')
-        if len(choice1) > 300:
-            messages.error(request, 'Your 1st choice is too long')
+        if len(choice1) > 500:
+            messages.error(request, 'Your 1st choice is too long!')
             return render(request, 'createpolls.html')
-        if len(choice2) > 300:
-            messages.error(request, 'Your 2nd choice is too long')
+        if len(choice2) > 500:
+            messages.error(request, 'Your 2nd choice is too long!')
             return render(request, 'createpolls.html')
-        if Publicpoll.objects.filter(title=title).exists():
-            if Publicpoll.objects.filter(desc=desc).exists():
-                messages.error(request, 'Be more creative')
-                return render(request, 'createpolls.html')
+        if Publicpoll.objects.filter(title=title, desc=desc, isActive=True).exists():
+            messages.error(request, 'Be more creative!')
+            return render(request, 'createpolls.html')
         publicpoll = Publicpoll(owner=owner, title=title, desc=desc, isActive=True,
                                 endtime=endtime, choice1=choice1, choice2=choice2, genre=genre)
         publicpoll.save()
@@ -174,19 +180,19 @@ def createPrivatePoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
-        if len(title) > 200:
+        if len(title) > 400:
             messages.error(
-                request, 'Your title must be under 200 characters')
+                request, 'Your title must be under 400 characters!')
             return render(request, 'createpolls.html')
-        if len(desc) > 500:
+        if len(desc) > 1000:
             messages.error(
-                request, 'Your description must be under 500 characters')
+                request, 'Your description must be under 1000 characters!')
             return render(request, 'createpolls.html')
-        if len(choice1) > 300:
-            messages.error(request, 'Your 1st choice is too long')
+        if len(choice1) > 500:
+            messages.error(request, 'Your 1st choice is too long!')
             return render(request, 'createpolls.html')
-        if len(choice2) > 300:
-            messages.error(request, 'Your 2nd choice is too long')
+        if len(choice2) > 500:
+            messages.error(request, 'Your 2nd choice is too long!')
             return render(request, 'createpolls.html')
         privatepoll = Privatepoll(owner=owner, title=title, desc=desc, isActive=True,
                                   endtime=endtime, choice1=choice1, choice2=choice2, genre=genre)
@@ -203,9 +209,9 @@ def deletepublicpoll(request, poll_id):
     if request.method == 'POST':
         delete = request.POST['delete']
         if delete == "delete":
-            publicpoll = Publicpoll.objects.filter(id=poll_id).first()
+            publicrefresh()
+            publicpoll = Publicpoll.objects.filter(id=poll_id, isActive=True).first()
             if publicpoll is not None:
-                publicrefresh()
                 if request.user == publicpoll.owner:
                     publicpoll.isActive = False
                     publicpoll.save()
@@ -229,9 +235,9 @@ def deleteprivatepoll(request, poll_id):
     if request.method == 'POST':
         delete = request.POST['delete']
         if delete == "delete":
-            privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+            privaterefresh()
+            privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
             if privatepoll is not None:
-                privaterefresh()
                 if request.user == privatepoll.owner:
                     privatepoll.isActive = False
                     privatepoll.save()
@@ -258,14 +264,14 @@ def privateinvite(request, poll_id):
         if privatepoll.owner == request.user:
             if privatepoll.isActive:
                 inviterefresh()
-                privateinvites = Privateinvite.objects.filter(poll=privatepoll)
+                privateinvites = Privateinvite.objects.filter(poll=privatepoll, isActive=True)
                 dict = {'usernames': usernames, 'privatepoll': privatepoll, 'privateinvites': privateinvites}
                 return render(request, 'privateinvite.html', dict)
             else:
                 messages.error(request, 'The poll is not active anymore :(')
                 return redirect('privatepolls')
         else:
-            messages.error(request, 'You do not have access to this poll.')
+            messages.error(request, 'You do not have access to invite people to this poll.')
             return redirect('privatepolls')
     else:
         messages.error(request, 'No such poll exists :(')
@@ -278,15 +284,13 @@ def deleteinvite(request, poll_id):
         deleteinvite = request.POST['deleteinvite']
         if deleteinvite == "reject":
             privaterefresh()
-            privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+            privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
             if privatepoll is not None:
                 if request.user == privatepoll.owner:
                     userrevoked = request.POST['userrevoked']
-                    reuser = User.objects.filter(
-                        username=userrevoked).first()
+                    reuser = User.objects.filter(username=userrevoked).first()
                     inviterefresh()
-                    privateinvite = Privateinvite.objects.filter(
-                        userinvited=reuser, poll=privatepoll, is_accepted=False).first()
+                    privateinvite = Privateinvite.objects.filter(userinvited=reuser, poll=privatepoll, isActive=True, is_accepted=False).first()
                     privateinvite.isActive = False
                     privateinvite.save()
                     messages.success(request, 'Invitation revoked!')
@@ -309,8 +313,7 @@ def publicpolldetails(request, poll_id):
     publicpoll = Publicpoll.objects.filter(id=poll_id).first()
     if publicpoll is not None:
         if publicpoll.isActive:
-            hasVoted = Publicvote.objects.filter(
-                user=request.user, poll=publicpoll).exists()
+            hasVoted = Publicvote.objects.filter(user=request.user, poll=publicpoll).exists()
             return render(request, 'polldetails.html', {'poll': publicpoll, 'hasVoted': hasVoted})
         else:
             messages.error(request, 'The poll is not active anymore :(')
@@ -354,14 +357,10 @@ def public_vote(request, poll_id):
         publicpoll = Publicpoll.objects.filter(id=poll_id).first()
         if publicpoll is not None:
             if Publicvote.objects.filter(user=request.user, poll=publicpoll).exists():
-                publicvote = Publicvote.objects.filter(
-                    user=request.user, poll=publicpoll).first()
-                messages.warning(
-                    request, 'You have already voted for this poll!')
+                messages.warning(request, 'You have already voted for this poll!')
             else:
                 choice = request.POST['choice']
-                publicvote = Publicvote(
-                    user=request.user, poll=publicpoll, choice=choice)
+                publicvote = Publicvote(user=request.user, poll=publicpoll, choice=choice)
                 publicvote.save()
                 if choice == publicpoll.choice1:
                     publicpoll.choice1_vote_count += 1
@@ -387,8 +386,6 @@ def private_vote(request, poll_id):
             requser = request.user
             if facedetect(requser.userprofile.head_shot.url):
                 if Privatevote.objects.filter(user=request.user, poll=privatepoll).exists():
-                    privatevote = Privatevote.objects.filter(
-                        user=request.user, poll=privatepoll).first()
                     messages.warning(
                         request, 'You have already voted for this poll!')
                 else:
@@ -446,7 +443,7 @@ def private_userinvite(request, poll_id):
                         messages.success(
                             request, 'Invitation sent successfully!')
                         messages.warning(
-                            request, 'Note: 1. This invitation will be revoked after 7 days. 2. If the user accepts the invitation, it can\'t be revoked.')
+                            request, 'Note: 1. This invitation will be revoked after 7 days. 2. Once the user accepts the invitation, it can\'t be revoked.')
                         return redirect('privateinvite', poll_id=poll_id)
                 else:
                     messages.error(request, 'The poll is not active anymore :(')
@@ -467,7 +464,7 @@ def private_userinvite(request, poll_id):
 def privateinvitations(request):
     privaterefresh()
     inviterefresh()
-    invitations = Privateinvite.objects.filter(userinvited=request.user)
+    invitations = Privateinvite.objects.filter(userinvited=request.user, isActive=True)
     if 'latest' in request.GET:
         invitations = invitations.order_by('-created')
     if 'oldest' in request.GET:
@@ -478,7 +475,10 @@ def privateinvitations(request):
         invitations = invitations.filter(is_accepted = True)
     if 'noaction' in request.GET:
         invitations = invitations.filter(is_accepted = False)
-    return render(request, 'invitations.html', {'invitations': invitations})
+    paginated_invitations = Paginator(invitations, 4)
+    page_number = request.GET.get('page')
+    invitation_page_obj = paginated_invitations.get_page(page_number)
+    return render(request, 'invitations.html', {'invitations': invitation_page_obj})
 
 
 @login_required
@@ -491,7 +491,10 @@ def acceptedinvites(request):
         invitations = invitations.order_by('created')
     if 'name' in request.GET:
         invitations = invitations.order_by(-Lower('poll'))
-    return render(request, 'acceptedinvites.html', {'invitations': invitations})
+    paginated_invitations = Paginator(invitations, 4)
+    page_number = request.GET.get('page')
+    invitation_page_obj = paginated_invitations.get_page(page_number)
+    return render(request, 'acceptedinvites.html', {'invitations': invitation_page_obj})
 
 
 @login_required
