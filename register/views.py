@@ -1,4 +1,3 @@
-from django.http.response import HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -121,24 +120,20 @@ def editprofile(request):
                 pass
             user = User.objects.filter(username = request.user).first()
             userprofile = UserProfile.objects.filter(user=user).first()
-            if fname != '':
-                userprofile.firstname = fname
-                userprofile.save()  
-            if lname != '':
-                userprofile.lastname = lname
-                userprofile.save()
             if email != '':
                 user.email = email
                 user.save()
+            if fname != '':
+                userprofile.firstname = fname 
+            if lname != '':
+                userprofile.lastname = lname
             if phone != '':
                 userprofile.phone = phone
-                userprofile.save()
             if image is not None:
                 userprofile.head_shot = image
-                userprofile.save()
             if bio != '':
                 userprofile.bio = bio
-                userprofile.save()
+            userprofile.save()
             messages.success(request, 'Changes saved successfully!')
             return redirect('profile')
         else:

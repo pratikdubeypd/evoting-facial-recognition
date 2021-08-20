@@ -17,7 +17,7 @@
         <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3">
             {% csrf_token %}
             <div class="col-12">
-                <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete poll</button>
+                <button type="submit" name="delete" id="delete" class="btn btn-outline-danger" value="delete">Delete poll</button>
             </div>
         </form>
     </div>
@@ -27,19 +27,23 @@
         <ul class="list-group">
             {% if privateinvites %}
             {% for p in privateinvites %}
-            {% if p.is_accepted %}
+            {% if p.isActive %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
-                <a class="btn btn-sm btn-warning" href="#" role="button">Invitation Accepted</a>
-            </li>
-            {% else %}
-            <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
-                <form onSubmit="return confirm('Are you sure you wish to revoke this invitation?');" action="/polls/privateinvite/{{privatepoll.id}}/deleteinvite" method="POST" class="row g-3">
+                <form onSubmit="return confirm('Are you sure you wish to revoke this invitation?');" action="/polls/privateinvite/{{privatepoll.id}}" method="POST" class="row g-3">
                     {% csrf_token %}
                     <div class="col-12">
                         <input type="hidden" id="userrevoked" name="userrevoked" value="{{p.userinvited}}">
-                        <button type="submit" name="deleteinvite" id="deleteinvite" class="btn btn-sm btn-outline-danger" value="reject">Revoke Invitation</button>
+                        <button type="submit" name="deleteinvite" id="deleteinvite" class="btn btn-sm btn-outline-danger" value="revoke">Revoke Invitation</button>
                     </div>
                 </form>
+            </li>
+            {% elif p.is_accepted %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
+                <a class="btn btn-sm btn-success" href="#" role="button">Invitation Accepted</a>
+            </li>
+            {% else %}
+            <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
+                <a class="btn btn-sm btn-warning" href="#" role="button">Invitation Rejected/Revoked</a>
             </li>
             {% endif %}
             {% endfor %}

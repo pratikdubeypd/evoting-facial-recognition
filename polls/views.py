@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect, HttpResponse
 from django.contrib import messages
 import datetime
+from django.contrib.auth import authenticate
 from django.core.paginator import Paginator
 from django.contrib.auth.models import User
 from django.db.models.functions import Lower
+from django.shortcuts import redirect, render
 from .models import Publicpoll, Privatepoll, Publicvote, Privatevote, Privateinvite
 from django.contrib.auth.decorators import login_required
 import json
@@ -48,7 +49,7 @@ def publicPolls(request):
             title__icontains=search_term)
         allPublicPollsdesc = allPublicPolls.filter(desc__icontains=search_term)
         allPublicPolls = allPublicPollstitle.union(allPublicPollsdesc)
-    paginated_publicpolls = Paginator(allPublicPolls, 4)
+    paginated_publicpolls = Paginator(allPublicPolls, 10)
     page_number = request.GET.get('page')
     poll_page_obj = paginated_publicpolls.get_page(page_number)
     dict = {'allPublicPolls': poll_page_obj, 'search_term': search_term}
@@ -85,7 +86,7 @@ def privatePolls(request):
                 desc__icontains=search_term)
             allPrivatePolls = allPrivatePollstitle.union(
                 allPrivatePollsdesc)
-        paginated_privatepolls = Paginator(allPrivatePolls, 4)
+        paginated_privatepolls = Paginator(allPrivatePolls, 5)
         page_number = request.GET.get('page')
         poll_page_obj = paginated_privatepolls.get_page(page_number)
         dict = {'allPrivatePolls': poll_page_obj,
@@ -205,6 +206,186 @@ def createPrivatePoll(request):
 
 
 @login_required
+def editpublicpoll(request, poll_id):
+    if request.method == 'POST':
+        # Get the post parameters
+        requser = request.user
+        password = request.POST['password']
+        user = authenticate(username=requser, password=password)
+        if user is not None:
+            publicpoll = Publicpoll.objects.filter(owner=requser, id=poll_id, isActive=True).first()
+            if publicpoll is not None:
+                title = request.POST['title']
+                desc = request.POST['desc']
+                choice1 = request.POST['choice1']
+                choice2 = request.POST['choice2']
+                genre = request.POST['genre']
+                endtime = request.POST['endtime']
+                if publicpoll.title == title:
+                    messages.error(request, 'No change in the title was detected!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if publicpoll.choice1 == choice1:
+                    messages.error(request, 'No change in the 1st choice was detected!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if publicpoll.choice2 == choice2:
+                    messages.error(request, 'No change in the 2nd choice was detected!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if publicpoll.genre == genre:
+                    messages.error(request, 'No change in the genre was detected!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if publicpoll.endtime == endtime:
+                    messages.error(request, 'No change in the expiration date was detected!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if len(title) > 400:
+                    messages.error(
+                        request, 'Your title must be under 400 characters!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if len(desc) > 1000:
+                    messages.error(
+                        request, 'Your description must be under 1000 characters!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if len(choice1) > 500:
+                    messages.error(request, 'Your 1st choice is too long!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if len(choice2) > 500:
+                    messages.error(request, 'Your 2nd choice is too long!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if Publicpoll.objects.filter(title=title, desc=desc, isActive=True).exists():
+                    messages.error(request, 'Be more creative!')
+                    return redirect('editpublicpoll', poll_id=poll_id)
+                if title != '':
+                    publicpoll.title = title 
+                if choice1 != '':
+                    publicpoll.choice1 = choice1
+                if choice2 != '':
+                    publicpoll.choice2 = choice2
+                if desc != '':
+                    publicpoll.desc == desc
+                if genre != '':
+                    publicpoll.genre == genre
+                if endtime != '':
+                    publicpoll.endtime = endtime
+                publicpoll.save()
+                messages.success(request, 'Changes saved successfully!')
+                return redirect('polldetails', poll_id=poll_id)
+            else:
+                messages.error(request, 'You cannot edit this public poll!')
+                return redirect('publicpolls')
+        else:
+            messages.error(request, 'Invalid Credentials!')
+            return redirect('editpublicpoll', poll_id=poll_id)
+    else:
+        publicrefresh()
+        publicpoll = Publicpoll.objects.filter(id=poll_id).first()
+        if publicpoll is not None:
+            if publicpoll.owner == request.user:
+                if publicpoll.isActive:
+                    return render(request, 'editpublicpoll.html',{'publicpoll': publicpoll})
+                else:
+                    messages.error(request, 'The poll is not active anymore :(')
+                    return redirect('publicpolls')
+            else:
+                messages.error(request, 'You cannot edit this public poll!')
+                return redirect('publicpolls')
+        else:
+            messages.error(request, 'No such poll exists :(')
+            return redirect('publicpolls')
+
+
+@login_required
+def editprivatepoll(request, poll_id):
+    if request.method == 'POST':
+        # Get the post parameters
+        requser = request.user
+        password = request.POST['password']
+        user = authenticate(username=requser, password=password)
+        if user is not None:
+            privatepoll = Privatepoll.objects.filter(owner=requser, id=poll_id, isActive=True).first()
+            if privatepoll is not None:
+                if facedetect(requser.userprofile.head_shot.url):
+                    title = request.POST['title']
+                    desc = request.POST['desc']
+                    choice1 = request.POST['choice1']
+                    choice2 = request.POST['choice2']
+                    genre = request.POST['genre']
+                    endtime = request.POST['endtime']
+                    if privatepoll.title == title:
+                        messages.error(request, 'No change in the title was detected!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if privatepoll.choice1 == choice1:
+                        messages.error(request, 'No change in the 1st choice was detected!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if privatepoll.choice2 == choice2:
+                        messages.error(request, 'No change in the 2nd choice was detected!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if privatepoll.genre == genre:
+                        messages.error(request, 'No change in the genre was detected!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if privatepoll.endtime == endtime:
+                        messages.error(request, 'No change in the expiration date was detected!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if len(title) > 400:
+                        messages.error(
+                            request, 'Your title must be under 400 characters!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if len(desc) > 1000:
+                        messages.error(
+                            request, 'Your description must be under 1000 characters!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if len(choice1) > 500:
+                        messages.error(request, 'Your 1st choice is too long!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if len(choice2) > 500:
+                        messages.error(request, 'Your 2nd choice is too long!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if Privatepoll.objects.filter(title=title, desc=desc, isActive=True).exists():
+                        messages.error(request, 'Be more creative!')
+                        return redirect('editprivatepoll', poll_id=poll_id)
+                    if title != '':
+                        privatepoll.title = title 
+                    if choice1 != '':
+                        privatepoll.choice1 = choice1
+                    if choice2 != '':
+                        privatepoll.choice2 = choice2
+                    if desc != '':
+                        privatepoll.desc == desc
+                    if genre != '':
+                        privatepoll.genre == genre
+                    if endtime != '':
+                        privatepoll.endtime = endtime
+                    privatepoll.save()
+                    messages.success(request, 'Changes saved successfully!')
+                    return redirect('privatepolldetails', poll_id=poll_id)
+                else:
+                    messages.error(request, 'Facial authentication failed, please try again.')
+                    messages.warning(request, 'Possible Reasons:\n1. Maybe the lighting is dull.\n2. Maybe you need to update your profile image.\n3. Maybe you are pretending to be the logged user!')
+                    return redirect('editprivatepoll', poll_id=poll_id)
+            else:
+                messages.error(request, 'You cannot edit this private poll!')
+                return redirect('privatepolls')
+        else:
+            messages.error(request, 'Invalid Credentials!')
+            return redirect('editprivatepoll', poll_id=poll_id)
+    else:
+        privaterefresh()
+        privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+        if privatepoll is not None:
+            if privatepoll.owner == request.user:
+                if privatepoll.isActive:
+                    return render(request, 'editprivatepoll.html',{'privatepoll': privatepoll})
+                else:
+                    messages.error(request, 'The poll is not active anymore :(')
+                    return redirect('privatepolls')
+            else:
+                messages.error(request, 'You cannot edit this private poll!')
+                return redirect('privatepolls')
+        else:
+            messages.error(request, 'No such poll exists :(')
+            return redirect('privatepolls')
+
+
+
+@login_required
 def deletepublicpoll(request, poll_id):
     if request.method == 'POST':
         delete = request.POST['delete']
@@ -217,14 +398,15 @@ def deletepublicpoll(request, poll_id):
                     publicpoll.save()
                     messages.success(
                         request, 'The public poll is deleted successfully!')
-                    return redirect('publicpolls')
                 else:
-                    return HttpResponse('You are not the owner of this poll, so you cannot delete it!')
+                    messages.error(request, 'You are not the owner of this poll, so you cannot delete it!')
+                return redirect('publicpolls')
             else:
                 messages.error(request, 'No such poll exists :(')
                 return redirect('publicpolls')
         else:
-            return HttpResponse('invalid choice!')
+            messages.error(request, 'Invalid choice!')
+            return redirect('publicpolls')
     else:
         messages.error(request, 'Error occurred!')
         return redirect('publicpolls')
@@ -243,14 +425,15 @@ def deleteprivatepoll(request, poll_id):
                     privatepoll.save()
                     messages.success(
                         request, 'The private poll is deleted successfully!')
-                    return redirect('privatepolls')
                 else:
-                    return HttpResponse('You are not the owner of this poll, so you cannot delete it!')
+                    messages.success(request, 'You are not the owner of this poll, so you cannot delete it!')
+                return redirect('privatepolls')
             else:
                 messages.error(request, 'No such poll exists :(')
                 return redirect('privatepolls')
         else:
-            return HttpResponse('invalid choice')
+            messages.error(request, 'Invalid choice!')
+            return redirect('privatepolls')
     else:
         messages.error(request, 'Error occurred!')
         return redirect('privatepolls')
@@ -258,31 +441,9 @@ def deleteprivatepoll(request, poll_id):
 
 @login_required
 def privateinvite(request, poll_id):
-    usernames = json.dumps(list(User.objects.values('username')))
-    privatepoll = Privatepoll.objects.filter(id=poll_id).first()
-    if privatepoll is not None:
-        if privatepoll.owner == request.user:
-            if privatepoll.isActive:
-                inviterefresh()
-                privateinvites = Privateinvite.objects.filter(poll=privatepoll, isActive=True)
-                dict = {'usernames': usernames, 'privatepoll': privatepoll, 'privateinvites': privateinvites}
-                return render(request, 'privateinvite.html', dict)
-            else:
-                messages.error(request, 'The poll is not active anymore :(')
-                return redirect('privatepolls')
-        else:
-            messages.error(request, 'You do not have access to invite people to this poll.')
-            return redirect('privatepolls')
-    else:
-        messages.error(request, 'No such poll exists :(')
-        return redirect('privatepolls')
-
-
-@login_required
-def deleteinvite(request, poll_id):
     if request.method == 'POST':
         deleteinvite = request.POST['deleteinvite']
-        if deleteinvite == "reject":
+        if deleteinvite == "revoke":
             privaterefresh()
             privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
             if privatepoll is not None:
@@ -296,15 +457,33 @@ def deleteinvite(request, poll_id):
                     messages.success(request, 'Invitation revoked!')
                     return redirect('privateinvite', poll_id=poll_id)
                 else:
-                    return HttpResponse('You are not the owner of this poll!')
+                    messages.error(request, 'You do not have access to revoke invitation for this poll!')
+                    return redirect('privatepolls')
             else:
                 messages.error(request, 'No such poll exists :(')
                 return redirect('privatepolls')
         else:
-            return HttpResponse('invalid choice!')
+            messages.error(request, 'Invalid choice!')
+            return redirect('privateinvite', poll_id=poll_id)
     else:
-        messages.error(request, 'Error occurred!')
-        return redirect('privatepolls')
+        usernames = json.dumps(list(User.objects.values('username')))
+        privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+        if privatepoll is not None:
+            if privatepoll.owner == request.user:
+                if privatepoll.isActive:
+                    inviterefresh()
+                    privateinvites = Privateinvite.objects.filter(poll=privatepoll)
+                    dict = {'usernames': usernames, 'privatepoll': privatepoll, 'privateinvites': privateinvites}
+                    return render(request, 'privateinvite.html', dict)
+                else:
+                    messages.error(request, 'The poll is not active anymore :(')
+                    return redirect('privatepolls')
+            else:
+                messages.error(request, 'You do not have access to invite people to this poll.')
+                return redirect('privatepolls')
+        else:
+            messages.error(request, 'No such poll exists :(')
+            return redirect('privatepolls')
 
 
 @login_required
@@ -433,7 +612,9 @@ def private_userinvite(request, poll_id):
                     if Privateinvite.objects.filter(userinvited=userin, poll=privatepoll, isActive=True).exists():
                         messages.warning(
                             request, 'This user is already invited!')
-                        return redirect('privateinvite', poll_id=poll_id)
+                    elif Privateinvite.objects.filter(userinvited=userin, poll=privatepoll, is_accepted=True).exists():
+                        messages.warning(
+                            request, 'This user has already accepted the invitivation!')
                     else:
                         expiry = datetime.datetime.now() + datetime.timedelta(days=7)
                         privateinvite = Privateinvite(
@@ -444,7 +625,7 @@ def private_userinvite(request, poll_id):
                             request, 'Invitation sent successfully!')
                         messages.warning(
                             request, 'Note: 1. This invitation will be revoked after 7 days. 2. Once the user accepts the invitation, it can\'t be revoked.')
-                        return redirect('privateinvite', poll_id=poll_id)
+                    return redirect('privateinvite', poll_id=poll_id)
                 else:
                     messages.error(request, 'The poll is not active anymore :(')
                     return redirect('privatepolls')
@@ -462,23 +643,47 @@ def private_userinvite(request, poll_id):
 
 @login_required
 def privateinvitations(request):
-    privaterefresh()
-    inviterefresh()
-    invitations = Privateinvite.objects.filter(userinvited=request.user, isActive=True)
-    if 'latest' in request.GET:
-        invitations = invitations.order_by('-created')
-    if 'oldest' in request.GET:
-        invitations = invitations.order_by('created')
-    if 'name' in request.GET:
-        invitations = invitations.order_by(-Lower('poll'))
-    if 'accepted' in request.GET:
-        invitations = invitations.filter(is_accepted = True)
-    if 'noaction' in request.GET:
-        invitations = invitations.filter(is_accepted = False)
-    paginated_invitations = Paginator(invitations, 4)
-    page_number = request.GET.get('page')
-    invitation_page_obj = paginated_invitations.get_page(page_number)
-    return render(request, 'invitations.html', {'invitations': invitation_page_obj})
+    if request.method == 'POST':
+        deletenotif = request.POST['deletenotif']
+        poll_id = request.POST['poll_id']
+        if deletenotif == "deletenotif":
+            privaterefresh()
+            privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
+            if privatepoll is not None:
+                inviterefresh()
+                if Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, isActive=True).exists():
+                    privateinvite = Privateinvite.objects.filter(
+                        userinvited=request.user, poll=privatepoll, isActive=True).first()
+                    privateinvite.isActive = False
+                    privateinvite.save()
+                    messages.success(request, 'Notification deleted!')
+                else:
+                    messages.error(request, 'No such invite exists :(')
+                return redirect('privateinvitations')
+            else:
+                messages.error(request, 'No such poll exists :(')
+                return redirect('privatepolls')
+        else:
+            messages.error(request, 'Invalid choice!')
+            return redirect('privateinvitations')
+    else:
+        privaterefresh()
+        inviterefresh()
+        invitations = Privateinvite.objects.filter(userinvited=request.user, isActive=True)
+        if 'latest' in request.GET:
+            invitations = invitations.order_by('-created')
+        if 'oldest' in request.GET:
+            invitations = invitations.order_by('created')
+        if 'name' in request.GET:
+            invitations = invitations.order_by(-Lower('poll'))
+        if 'accepted' in request.GET:
+            invitations = invitations.filter(is_accepted = True)
+        if 'noaction' in request.GET:
+            invitations = invitations.filter(is_accepted = False)
+        paginated_invitations = Paginator(invitations, 5)
+        page_number = request.GET.get('page')
+        invitation_page_obj = paginated_invitations.get_page(page_number)
+        return render(request, 'invitations.html', {'invitations': invitation_page_obj})
 
 
 @login_required
@@ -491,7 +696,7 @@ def acceptedinvites(request):
         invitations = invitations.order_by('created')
     if 'name' in request.GET:
         invitations = invitations.order_by(-Lower('poll'))
-    paginated_invitations = Paginator(invitations, 4)
+    paginated_invitations = Paginator(invitations, 5)
     page_number = request.GET.get('page')
     invitation_page_obj = paginated_invitations.get_page(page_number)
     return render(request, 'acceptedinvites.html', {'invitations': invitation_page_obj})
@@ -502,39 +707,41 @@ def invitechoice(request, poll_id):
     if request.method == 'POST':
         invitechoice = request.POST['invitechoice']
         privaterefresh()
-        inviterefresh()
-        privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+        privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
         if privatepoll is not None:
-            if privatepoll.isActive:
-                if invitechoice == "accept":
-                    if Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, isActive=True).exists():
-                        privateinvite = Privateinvite.objects.filter(
-                            userinvited=request.user, poll=privatepoll, isActive=True).first()
-                        privateinvite.is_accepted = True
-                        privateinvite.save()
-                        privatepoll.userAccess += f' {request.user}'
-                        privatepoll.save()
-                        messages.success(request, 'Invitation accepted!')
-                        return redirect('acceptedinvites')
-                    else:
-                        messages.error(request, 'No such invite exists :(')
-                        return redirect('privateinvitations')
-                elif invitechoice == "reject":
-                    if Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, isActive=True).exists():
-                        privateinvite = Privateinvite.objects.filter(
-                            userinvited=request.user, poll=privatepoll).first()
-                        privateinvite.isActive = False
-                        privateinvite.save()
-                        messages.success(request, 'Invitation rejected!')
-                        return redirect('privateinvitations')
-                    else:
-                        messages.error(request, 'No such invite exists :(')
-                        return redirect('privateinvitations')
+            inviterefresh()
+            if invitechoice == "accept":
+                if Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, is_accepted=True, isActive=True).exists():
+                    messages.warning(request, 'You have already accepted this invite!')
+                    return redirect('privateinvitations')
+                elif Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, is_accepted=False, isActive=True).exists():
+                    privateinvite = Privateinvite.objects.filter(
+                        userinvited=request.user, poll=privatepoll, is_accepted=False, isActive=True).first()
+                    privateinvite.is_accepted = True
+                    privateinvite.save()
+                    privatepoll.userAccess += f' {request.user}'
+                    privatepoll.save()
+                    messages.success(request, 'Invitation accepted!')
+                    return redirect('acceptedinvites')
                 else:
-                    return HttpResponse('invalid choice!')
+                    messages.error(request, 'No such invite exists :(')
+                    return redirect('privateinvitations')
+            elif invitechoice == "reject":
+                if Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, is_accepted=True, isActive=True).exists():
+                    messages.warning(request, 'You have already accepted this invite!')
+                    return redirect('privateinvitations')
+                elif Privateinvite.objects.filter(userinvited=request.user, poll=privatepoll, is_accepted=False, isActive=True).exists():
+                    privateinvite = Privateinvite.objects.filter(
+                        userinvited=request.user, poll=privatepoll, is_accepted=False, isActive=True).first()
+                    privateinvite.isActive = False
+                    privateinvite.save()
+                    messages.success(request, 'Invitation rejected!')
+                    return redirect('privateinvitations')
+                else:
+                    messages.error(request, 'No such invite exists :(')
+                    return redirect('privateinvitations')
             else:
-                messages.error(
-                    request, 'The poll is not active anymore :(')
+                messages.success(request, 'Invalid choice!')
                 return redirect('privateinvitations')
         else:
             messages.error(request, 'No such poll exists :(')

@@ -12,20 +12,25 @@
         <div class="col-lg-3 mb-5">
             <div class="card h-100">
                 <div class="card-body text-center">
-                    <div class="mb-5">
+                    <div class="text-center mb-4">
+                        <h5>Preview:</h5><span class="badge bg-secondary">{{user}}</span>
+                    </div>
+                    <div class="mb-4">
                         <div class="avatar avatar-xl">
-                            <img src="{{user.userprofile.head_shot.url }}" alt="Profile image of {{user}}"
+                            <img src="{{ user.userprofile.head_shot.url }}" alt="Profile image of {{user}}"
                                 class="avatar-img rounded-circle" width="150">
+                            <p class="mt-2" style="font-size: 12px;">(Note: No preview for profile image available.)</p>
                         </div>
                     </div>
                     <div class="text-center">
                         <div class="col-12">
-                            <h4 class="mb-1">{{user.userprofile.firstname}} {{user.userprofile.lastname}}</h4>
-                            <span class="badge bg-secondary">{{user}}</span>
+                            <h4 class="mb-2"><span id="firstname">{{user.userprofile.firstname}}</span> <span id="lastname">{{user.userprofile.lastname}}</span></h4>
+                            <h6 class="mb-2">Email: <span id="displayemail">{{user.email}}</span></h6>
+                            <h6 class="mb-2">Phone Number: <span id="displayphone">{{user.userprofile.phone}}</span></h6>
                         </div>
-                        <div class="col-12 my-2">
+                        <div class="col-12 my-3">
                             <h6>About me:</h6>
-                            <p class="text-muted">{{user.userprofile.bio|truncatewords:50}}</p>
+                            <p id="mybio" class="text-muted">{{user.userprofile.bio|truncatewords:50}}</p>
                         </div>
                     </div>
                 </div>
@@ -37,7 +42,7 @@
                     <form action="/profile/editprofile/" onSubmit="return confirm('Are you sure you wish to make these changes?');" method="POST" enctype="multipart/form-data" class="row g-3"> {% csrf_token %}
                         <div class="col-12">
                             <label for="username" class="form-label">Username: {{user}}</label>
-                            <br>
+                            <br class="d-block d-md-none">
                             <b style="font-size: 12px;">(You cannot change your username.)</b>
                         </div>
                         <div class="col-md-6">
@@ -57,7 +62,7 @@
                         </div>
                         <div class="col-md-6">
                             <label for="phone" class="form-label">Phone Number:</label>
-                            <input type="tel" class="form-control" name="phone" pattern="[0-9]{10}"
+                            <input type="tel" class="form-control" name="phone" id="phone" pattern="[0-9]{10}"
                                 placeholder="{{user.userprofile.phone}}">
                         </div>
                         <div class="col-12">
@@ -89,4 +94,64 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // preview for first name
+    const fname = document.getElementById('fname')
+    fname.addEventListener('keyup', (e) => {
+        firstname.innerHTML = ""
+        if (e.target.value != "") {
+            firstname.innerHTML += `${e.target.value}`
+        }
+        if (e.target.value == ""){
+            firstname.innerHTML = `{{user.userprofile.firstname}}`
+        }
+    })
+    // preview for last name
+    const lname = document.getElementById('lname')
+    lname.addEventListener('keyup', (e) => {
+        lastname.innerHTML = ""
+        if (e.target.value != "") {
+            lastname.innerHTML += `${e.target.value}`
+        }
+        if (e.target.value == ""){
+            lastname.innerHTML = `{{user.userprofile.lastname}}`
+        }
+    })
+    // preview for email
+    const email = document.getElementById('email')
+    email.addEventListener('keyup', (e) => {
+        displayemail.innerHTML = ""
+        if (e.target.value != "") {
+            displayemail.innerHTML += `${e.target.value}`
+        }
+        if (e.target.value == ""){
+            displayemail.innerHTML = `{{user.email}}`
+        }
+    })
+    // preview for phone
+    const phone = document.getElementById('phone')
+    phone.addEventListener('keyup', (e) => {
+        displayphone.innerHTML = ""
+        if (e.target.value != "") {
+            displayphone.innerHTML += `${e.target.value}`
+        }
+        if (e.target.value == ""){
+            displayphone.innerHTML = `{{user.userprofile.phone}}`
+        }
+    })
+    // preview for bio
+    const bio = document.getElementById('bio')
+    bio.addEventListener('keyup', (e) => {
+        mybio.innerHTML = ""
+        if (e.target.value != "") {
+            mybio.innerHTML += `${e.target.value}`
+        }
+        if (e.target.value == ""){
+            mybio.innerHTML = `{{user.userprofile.bio}}`
+        }
+    })
+</script>
 {% endblock %}

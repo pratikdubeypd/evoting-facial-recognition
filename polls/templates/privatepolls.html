@@ -116,8 +116,9 @@
                     href="/polls/privatepolldetails/{{poll.id}}">{{poll.title|truncatewords:50}}</a></p>
                 <p>Created by You on {{poll.pub_date|date:"d M, Y H:m"}}</p>
                 <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}</p>
-                <a href="/polls/privatepolldetails/{{poll.id}}" class="btn btn-primary" role="button">See More...</a>
-                <a href="/polls/privateinvite/{{poll.id}}" class="btn btn-primary" role="button">Invite</a>
+                <a href="/polls/privatepolldetails/{{poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>
+                <a class="btn btn-outline-primary" href="/polls/privatepolldetails/{{poll.id}}/editprivatepoll" role="button">Edit poll</a>
+                <a href="/polls/privateinvite/{{poll.id}}" class="btn btn-outline-primary" role="button">Invite</a>
             </li>
             {% endfor %}
         </ul>

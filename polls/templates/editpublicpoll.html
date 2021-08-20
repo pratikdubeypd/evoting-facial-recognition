@@ -1,0 +1,67 @@
+{% extends 'basic.html' %}
+
+{% block title %}Edit Public Polls{% endblock %}
+
+{% block publicPollsActive %}active{% endblock %}
+
+{% block body %}
+<div class="container my-3 main">
+    <h3 class="text-center">Edit the Public Poll: {{publicpoll.title}}</h3>
+    <hr>
+    <div class="card h-100">
+        <div class="card-body">
+            <form action="/polls/polldetails/{{publicpoll.id}}/editpublicpoll"
+                onSubmit="return confirm('Are you sure you wish to make these changes?');" method="POST" class="row g-3">
+                {% csrf_token %}
+                <div class="col-12">
+                    <label for="title" class="form-label">Poll's title:</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="{{publicpoll.title}}">
+                </div>
+                <div class="col-12">
+                    <label for="desc" class="form-label">Describtion of the poll:</label>
+                    <textarea class="form-control" id="desc" name="desc" rows="4"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="choice1" class="form-label">Choice 1:</label>
+                    <input type="text" class="form-control" id="choice1" name="choice1"
+                        placeholder="{{publicpoll.choice1}}">
+                </div>
+                <div class="col-md-6">
+                    <label for="choice2" class="form-label">Choice 2:</label>
+                    <input type="text" class="form-control" id="choice2" name="choice2"
+                        placeholder="{{publicpoll.choice2}}">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="endtime">Change when this poll should end?</label>
+                    <br>
+                    <b style="font-size: 12px;">(You have scheduled this poll to end by {{publicpoll.endtime}})</b>
+                    <br>
+                    <input class="form-control" type="datetime-local" id="endtime" name="endtime">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="genre">Change genre for this poll?</label>
+                    <br>
+                    <b style="font-size: 12px;">(Genre selected for this poll is {{publicpoll.genre}})</b>
+                    <br>
+                    <select class="form-select" id="genre" name="genre">
+                        <option selected>Choose...</option>
+                        <option value="General">General</option>
+                        <option value="Political">Political</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Opinion">Opinion</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label for="password" class="form-label">Enter your account's password to update the changes:</label>
+                    <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password"
+                        required>
+                </div>
+                <div class="col-12">
+                    <button type="submit" id="createbutton" class="btn btn-outline-primary">Update</button>
+                    <a class="btn btn-outline-danger my-2" href="/polls/polldetails/{{publicpoll.id}}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

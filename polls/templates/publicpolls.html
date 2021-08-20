@@ -138,11 +138,13 @@
                 </p>
                 {% endif %}
                 <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}</p>
-                <a href="/polls/polldetails/{{poll.id}}" class="btn btn-primary" role="button">See More...</a>
+                <a href="/polls/polldetails/{{poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>
+                {% if request.user == poll.owner %}
+                <a class="btn btn-outline-primary" href="/polls/polldetails/{{poll.id}}/editpublicpoll" role="button">Edit poll</a>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
     </div>
 </div>
 {% endblock %}
-<!-- ?page={{ allPublicPolls.next_page_number }} -->

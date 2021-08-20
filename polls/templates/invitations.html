@@ -106,9 +106,16 @@
                 <p>This notification will be deleted automatically by: {{invites.expiry|date:"d M, Y H:m"}}.</p>
                 <b>You've accepted this invite!</b>
                 <br>
-                <a class="btn btn-outline-primary my-2" href="/polls/invitations/acceptedinvites" role="button">View
-                    accepted invitations</a>
-                <a class="btn btn-danger" href="#" role="button">Delete notification</a>
+                <form action="/polls/invitations/" method="POST" class="row g-3">
+                    {% csrf_token %}
+                    <div class="col-12">
+                        <a class="btn btn-outline-primary my-2" href="/polls/invitations/acceptedinvites" role="button">View
+                            accepted invitations</a>
+                        <input type="hidden" id="poll_id" name="poll_id" value="{{invites.poll.id}}">
+                        <button type="submit" name="deletenotif" id="deletenotif" class="btn btn-danger"
+                            value="deletenotif">Delete notification</button>
+                    </div>
+                </form>
                 {% else %}
                 <p>The invitation will expire on: {{invites.expiry|date:"d M, Y H:m"}}.</p>
                 <form action="/polls/invitations/{{invites.poll.id}}/invitechoice" method="POST" class="row g-3">

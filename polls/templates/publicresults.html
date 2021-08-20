@@ -27,7 +27,7 @@
         <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/polldetails/{{publicpoll.id}}/deletepublicpoll" method="POST" class="row g-3">
             {% csrf_token %}
             <div class="col-12">
-                <button type="submit" name="delete" id="delete" class="btn btn-danger" value="delete">Delete
+                <button type="submit" name="delete" id="delete" class="btn btn-outline-danger" value="delete">Delete
                     poll</button>
             </div>
         </form>

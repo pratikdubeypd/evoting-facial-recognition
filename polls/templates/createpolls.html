@@ -8,48 +8,54 @@
 <div class="container my-3 main">
     <h3 class="text-center">Create a Poll</h3>
     <hr>
-    <form action="/polls/createpublicpoll/" method="POST" class="row g-3" id="createpoll"> {% csrf_token %}
-        <div class="col-12">
-            <label for="title" class="form-label">Give your poll a title</label>
-            <input type="text" class="form-control" id="title" name="title" placeholder="Enter your title here"
-                required>
+    <div class="card h-100">
+        <div class="card-body">
+            <form action="/polls/createpublicpoll/" method="POST" class="row g-3" id="createpoll">
+                {% csrf_token %}
+                <div class="col-12">
+                    <label for="title" class="form-label">Give your poll a title:</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="Enter your title here"
+                        required>
+                </div>
+                <div class="col-12">
+                    <label for="desc" class="form-label">Describe the poll:</label>
+                    <textarea class="form-control" id="desc" name="desc" rows="4"></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="choice1" class="form-label">Choice 1:</label>
+                    <input type="text" class="form-control" id="choice1" name="choice1" placeholder="Enter choice 1"
+                        required>
+                </div>
+                <div class="col-md-6">
+                    <label for="choice2" class="form-label">Choice 2:</label>
+                    <input type="text" class="form-control" id="choice2" name="choice2" placeholder="Enter choice 2"
+                        required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="endtime">When should we end this poll?</label>
+                    <br>
+                    <input class="form-control" type="datetime-local" id="endtime" name="endtime" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" for="genre">Please select a genre for this poll:</label>
+                    <select class="form-select" id="genre" name="genre">
+                        <option selected>Choose...</option>
+                        <option value="General">General</option>
+                        <option value="Political">Political</option>
+                        <option value="Entertainment">Entertainment</option>
+                        <option value="Opinion">Opinion</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <input type="checkbox" class="form-check-input" id="privatepollchoice" name="privatepollchoice">
+                    <label class="form-check-label" for="privatepollchoice"><b>Mark as private</b></label>
+                </div>
+                <div class="col-12">
+                    <button type="submit" id="createbutton" class="btn btn-primary">Create Poll</button>
+                </div>
+            </form>
         </div>
-        <div class="col-12">
-            <label for="desc" class="form-label">Describe the poll</label>
-            <textarea class="form-control" id="desc" name="desc" rows="4"></textarea>
-        </div>
-        <div class="col-md-6">
-            <label for="choice1" class="form-label">Choice 1</label>
-            <input type="text" class="form-control" id="choice1" name="choice1" placeholder="Enter choice 1" required>
-        </div>
-        <div class="col-md-6">
-            <label for="choice2" class="form-label">Choice 2</label>
-            <input type="text" class="form-control" id="choice2" name="choice2" placeholder="Enter choice 2" required>
-        </div>
-        <div class="col-md-6">
-            <label for="endtime">When should we end this poll?</label>
-            <br>
-            <input class="my-2" type="datetime-local" id="endtime" name="endtime" required>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label" for="genre">Please select a genre for this poll</label>
-            <select class="form-select" id="genre" name="genre">
-                <option selected>Choose...</option>
-                <option value="General">General</option>
-                <option value="Political">Political</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Opinion">Opinion</option>
-            </select>
-        </div>
-        <hr>
-        <div class="col-12">
-            <input type="checkbox" class="form-check-input" id="privatepollchoice" name="privatepollchoice">
-            <label class="form-check-label" for="privatepollchoice">Mark as private</label>
-        </div>
-        <div class="col-12">
-            <button type="submit" id="createbutton" class="btn btn-primary">Create Poll</button>
-        </div>
-    </form>
+    </div>
 </div>
 {% endblock %}
 
