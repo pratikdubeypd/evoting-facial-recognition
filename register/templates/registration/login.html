@@ -9,23 +9,28 @@
     {% else %}
     <h3 class="text-center">Login to iVote</h3>
     <hr>
-    <form action="/login/" method="POST" class="row g-3"> {% csrf_token %}
-        <div class="col-12">
-            <label for="loginusername" class="form-label">Username:</label>
-            <input type="text" class="form-control" name="loginusername" id="loginusername"
-                placeholder="Enter your Username" required>
+    <div class="card h-100">
+        <div class="card-body">
+            <form action="/login/" method="POST" class="row g-3">
+                {% csrf_token %}
+                <div class="col-12">
+                    <label for="loginusername" class="form-label">Username:</label>
+                    <input type="text" class="form-control" name="loginusername" id="loginusername"
+                        placeholder="Enter your Username" required>
+                </div>
+                <div class="col-12">
+                    <label for="password" class="form-label">Password:</label>
+                    <input type="password" class="form-control" name="password" id="password"
+                        placeholder="Enter your password" required>
+                </div>
+                <input type="hidden" name="next" value="{{request.GET.next}}">
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                    <a href="/resetpassword" class="btn btn-danger mx-2" role="button">Forgot password?</a>
+                </div>
+            </form>
         </div>
-        <div class="col-12">
-            <label for="password" class="form-label">Password:</label>
-            <input type="password" class="form-control" name="password" id="password" placeholder="Enter your password"
-                required>
-        </div>
-        <input type="hidden" name="next" value="{{request.GET.next}}">
-        <div class="col-12">
-            <button type="submit" class="btn btn-primary">Login</button>
-            <a href="/" class="btn btn-danger mx-2" role="button">Forgot password?</a>
-        </div>
-    </form>
+    </div>
     <div class="col-12 my-2">
         <p>Don't have an account? <a href="/signup" style="text-decoration: none;">Signup here.</a></p>
     </div>

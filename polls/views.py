@@ -384,7 +384,6 @@ def editprivatepoll(request, poll_id):
             return redirect('privatepolls')
 
 
-
 @login_required
 def deletepublicpoll(request, poll_id):
     if request.method == 'POST':

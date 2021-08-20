@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from .models import UserProfile, Contact
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django.core.validators import validate_email
 import os
 import face_recognition
 import cv2
@@ -48,15 +49,24 @@ def signup(request):
         image = request.FILES.get('image')
         bio = request.POST['bio']
         # Check for errorneous inputs
+        try:
+            validate_email(email)
+        except:
+            messages.error(request, 'The given email does not exist!')
+            return redirect('signup')
         if len(username) > 40:
             messages.error(
-                request, 'Your username must be under 40 characters')
+                request, 'Your username must be under 40 characters!')
             return redirect('signup')
         if not username.isalnum():
-            messages.error(request, 'Your username must be alphanumeric')
+            messages.error(request, 'Your username must be alphanumeric!')
             return redirect('signup')
         if pass1 != pass2:
-            messages.error(request, 'Passwords do not match')
+            messages.error(request, 'Passwords do not match!')
+            return redirect('signup')
+        if len(pass1) < 8:
+            messages.error(
+                request, 'Your password must be of minimum 8 characters!')
             return redirect('signup')
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists!')
