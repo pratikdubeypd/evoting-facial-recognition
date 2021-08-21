@@ -86,7 +86,7 @@
             {% if invites.poll.isActive and invites.is_accepted %}
             <li class="list-group-item col-12">
                 <p><a style="text-decoration: none; font-size: 22px;"
-                    href="/polls/privatepolldetails/{{invites.poll.id}}">{{invites.poll.title|truncatewords:50}}</a></p>
+                    href="/polls/privatepolldetails/{{invites.poll.id}}">{{invites.poll.title|truncatechars:100}}</a></p>
                 <p>Created by <a href="/userprofile/{{invites.poll.owner}}"><span
                             class="badge bg-secondary">{{invites.poll.owner}}</span></a> on {{invites.poll.pub_date|date:"d M, Y H:m"}}.
                 </p>

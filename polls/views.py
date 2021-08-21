@@ -97,6 +97,22 @@ def privatePolls(request):
         return render(request, 'privatepolls.html')
 
 
+@login_required
+def votingHistory(request):
+    publicrefresh()
+    publicvote = Publicvote.objects.filter(user=request.user)
+    votes = publicvote
+    if 'private' in request.GET:
+        privaterefresh()
+        privatevote = Privatevote.objects.filter(user=request.user)
+        votes = privatevote
+    paginated_votes = Paginator(votes, 10)
+    page_number = request.GET.get('page')
+    vote_page_obj = paginated_votes.get_page(page_number)
+    dict = {'votes': vote_page_obj}
+    return render(request, 'votinghistory.html', dict)
+
+
 def publicrefresh():
     now = datetime.datetime.now()
     outdatedpoll = Publicpoll.objects.raw(
@@ -209,11 +225,10 @@ def createPrivatePoll(request):
 def editpublicpoll(request, poll_id):
     if request.method == 'POST':
         # Get the post parameters
-        requser = request.user
         password = request.POST['password']
-        user = authenticate(username=requser, password=password)
+        user = authenticate(username=request.user, password=password)
         if user is not None:
-            publicpoll = Publicpoll.objects.filter(owner=requser, id=poll_id, isActive=True).first()
+            publicpoll = Publicpoll.objects.filter(owner=request.user, id=poll_id, isActive=True).first()
             if publicpoll is not None:
                 title = request.POST['title']
                 desc = request.POST['desc']
@@ -296,13 +311,12 @@ def editpublicpoll(request, poll_id):
 def editprivatepoll(request, poll_id):
     if request.method == 'POST':
         # Get the post parameters
-        requser = request.user
         password = request.POST['password']
-        user = authenticate(username=requser, password=password)
+        user = authenticate(username=request.user, password=password)
         if user is not None:
-            privatepoll = Privatepoll.objects.filter(owner=requser, id=poll_id, isActive=True).first()
+            privatepoll = Privatepoll.objects.filter(owner=request.user, id=poll_id, isActive=True).first()
             if privatepoll is not None:
-                if facedetect(requser.userprofile.head_shot.url):
+                if facedetect(request):
                     title = request.POST['title']
                     desc = request.POST['desc']
                     choice1 = request.POST['choice1']
@@ -420,13 +434,18 @@ def deleteprivatepoll(request, poll_id):
             privatepoll = Privatepoll.objects.filter(id=poll_id, isActive=True).first()
             if privatepoll is not None:
                 if request.user == privatepoll.owner:
-                    privatepoll.isActive = False
-                    privatepoll.save()
-                    messages.success(
-                        request, 'The private poll is deleted successfully!')
+                    if facedetect(request):
+                        privatepoll.isActive = False
+                        privatepoll.save()
+                        messages.success(request, 'The private poll is deleted successfully!')
+                        return redirect('privatepolls')
+                    else:
+                        messages.error(request, 'Facial authentication failed, please try again.')
+                        messages.warning(request, 'Possible Reasons:\n1. Maybe the lighting is dull.\n2. Maybe you need to update your profile image.\n3. Maybe you are pretending to be the logged user!')
+                        return redirect('privatepolldetails', poll_id=poll_id)
                 else:
                     messages.success(request, 'You are not the owner of this poll, so you cannot delete it!')
-                return redirect('privatepolls')
+                    return redirect('privatepolls')
             else:
                 messages.error(request, 'No such poll exists :(')
                 return redirect('privatepolls')
@@ -561,8 +580,7 @@ def private_vote(request, poll_id):
         privaterefresh()
         privatepoll = Privatepoll.objects.filter(id=poll_id).first()
         if privatepoll is not None:
-            requser = request.user
-            if facedetect(requser.userprofile.head_shot.url):
+            if facedetect(request):
                 if Privatevote.objects.filter(user=request.user, poll=privatepoll).exists():
                     messages.warning(
                         request, 'You have already voted for this poll!')
@@ -752,7 +770,6 @@ def invitechoice(request, poll_id):
 
 # results
 
-
 @login_required
 def public_results(request, poll_id):
     publicrefresh()
@@ -805,13 +822,13 @@ def private_results(request, poll_id):
 
 # facial authentication
 
-
-def facedetect(img):
+@login_required
+def facedetect(request):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     MEDIA_ROOT = os.path.join(BASE_DIR, 'register')
 
-    img = (str(MEDIA_ROOT)+img)
-    save_path = (str(MEDIA_ROOT)+'\\media\\userrecog\\userimage.png')
+    img = (str(MEDIA_ROOT)+request.user.userprofile.head_shot.url)
+    save_path = (str(MEDIA_ROOT)+f'\\media\\userrecog\\{request.user}.png')
 
     camera = cv2.VideoCapture(0)
     i = 0

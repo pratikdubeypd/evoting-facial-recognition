@@ -16,9 +16,9 @@
             and is
             ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.</p>
         {% else %}
-        <p>This poll is created by <a href="/userprofile/{{publicpoll.owner}}"><span
-                    class="badge bg-secondary">{{publicpoll.owner}}</span></a> on {{publicpoll.pub_date|date:"d M, Y
-            H:m"}} and is ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.
+        <p>This poll is created by <a href="/userprofile/{{publicpoll.owner}}">
+            <span class="badge bg-secondary">{{publicpoll.owner}} </span></a> 
+            on {{publicpoll.pub_date|date:"d M, YH:m"}} and is ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.
         </p>
         {% endif %}
         <h6>Description:</h6>
@@ -48,7 +48,7 @@
             <span class="badge bg-primary rounded-pill">{{publicpoll.choice2_vote_count}}</span>
         </li>
     </ul>
-    <div class="my-2">You have voted for {{publicvote.choice|truncatewords:100}}</div>
+    <div class="my-2">You have voted for {{publicvote.choice|truncatechars:100}}</div>
     {% else %}
     <p>Please go back and vote to see the results.</p>>
     {% endif %}

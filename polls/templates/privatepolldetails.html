@@ -1,12 +1,12 @@
 {% extends 'basic.html' %}
 
-{% block title %}Private Poll - {{poll.title}}{% endblock %}
+{% block title %}Private Poll{% endblock %}
 
 {% block profileActive %}active{% endblock %}
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center">Private Poll Title: {{poll.title}}</h3>
+    <h3 class="text-center">Private Poll Title: {{poll.title|truncatechars:50}}</h3>
     <hr>
     <div class="col-12">
         <h6>About this poll:</h6>
@@ -16,10 +16,13 @@
             ending on {{poll.endtime|date:"d M, Y H:m"}}.</p>
         <h6>Description:</h6>
         <p>{{poll.desc}}</p>
-        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{poll.id}}/deleteprivatepoll" method="POST" class="row g-3">
+        <form
+            onSubmit="return confirm('Are you sure you wish to delete this poll? If yes, we will have to authenticate that it\'s really you because this is a private poll. Hit the OK button whenever you are ready for facial authentication!');"
+            action="/polls/privatepolldetails/{{poll.id}}/deleteprivatepoll" method="POST" class="row g-3">
             {% csrf_token %}
             <div class="col-12">
-                <a class="btn btn-outline-primary" href="/polls/privatepolldetails/{{poll.id}}/editprivatepoll" role="button">Edit poll</a>
+                <a class="btn btn-outline-primary" href="/polls/privatepolldetails/{{poll.id}}/editprivatepoll"
+                    role="button">Edit poll</a>
                 <a href="/polls/privateinvite/{{poll.id}}" class="btn btn-outline-primary" role="button">Invite</a>
                 <button type="submit" name="delete" id="delete" class="btn btn-outline-danger" value="delete">Delete
                     poll</button>
@@ -38,13 +41,14 @@
     <b>You have already voted!</b>
     <p>The choices were:</p>
     <ul class="list-group">
-        <li class="list-group-item">1. {{poll.choice1|truncatewords:100}}</li>
-        <li class="list-group-item">2. {{poll.choice2|truncatewords:100}}</li>
+        <li class="list-group-item">1. {{poll.choice1}}</li>
+        <li class="list-group-item">2. {{poll.choice2}}</li>
     </ul>
     <a class="btn btn-primary mt-3" href="/polls/privatepolldetails/{{poll.id}}/results" role="button">See Results</a>
     {% else %}
     <b>Choose any one:</b>
-    <form onSubmit="return confirm('Hit the OK button whenever you are ready for facial authentication!');" action="/polls/privatepolldetails/{{poll.id}}/vote/" method="POST">
+    <form onSubmit="return confirm('Hit the OK button whenever you are ready for facial authentication!');"
+        action="/polls/privatepolldetails/{{poll.id}}/vote/" method="POST">
         {% csrf_token %}
         <div class="form-check my-2">
             <input class="form-check-input" type="radio" name="choice" id="choice1" value="{{poll.choice1}}" required>

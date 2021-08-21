@@ -11,11 +11,14 @@
     <div class="col-12">
         <h6>About this poll:</h6>
         {% if request.user == privatepoll.owner %}
-        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}}
+        <p>This poll is created by You 
+            <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> 
+            on {{privatepoll.pub_date|date:"d M, Y H:m"}}
             and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.</p>
         <h6>Description:</h6>
         <p>{{privatepoll.desc}}</p>
-        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3"> {% csrf_token %}
+        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/privatepolldetails/{{privatepoll.id}}/deleteprivatepoll" method="POST" class="row g-3">
+            {% csrf_token %}
             <div class="col-12">
                 <a href="/polls/privateinvite/{{privatepoll.id}}" class="btn btn-outline-primary" role="button">Invite</a>
                 <button type="submit" name="delete" id="delete" class="btn btn-outline-danger" value="delete">Delete poll</button>
@@ -23,7 +26,8 @@
         </form>
         {% else %}
         <p>This poll is created by <a href="/userprofile/{{privatepoll.owner}}"><span
-                    class="badge bg-secondary">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}} and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.
+                    class="badge bg-secondary">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}} 
+                    and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.
         </p>
         <h6>Description:</h6>
         <p>{{privatepoll.desc}}</p>
@@ -44,7 +48,7 @@
             <span class="badge bg-primary rounded-pill">{{privatepoll.choice2_vote_count}}</span>
         </li>
     </ul>
-    <div class="my-2">You have voted for {{privatevote.choice|truncatewords:100}}</div>
+    <div class="my-2">You have voted for {{privatevote.choice|truncatechars:100}}</div>
     {% else %}
     <p>Please go back and vote to see the results.</p>
     {% endif %}

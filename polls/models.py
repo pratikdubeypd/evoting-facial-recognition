@@ -6,7 +6,7 @@ from django.utils import timezone
 class Publicpoll(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=400)
+    title = models.CharField(max_length=200)
     desc=models.TextField(default="")
     pub_date = models.DateTimeField(default=timezone.now)
     choice1 = models.CharField(max_length=500, default="")
@@ -24,7 +24,7 @@ class Publicpoll(models.Model):
 class Privatepoll(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     id = models.AutoField(primary_key=True)
-    title = models.CharField(max_length=400)
+    title = models.CharField(max_length=200)
     desc=models.TextField(default="")
     pub_date = models.DateTimeField(default=timezone.now)
     choice1 = models.CharField(max_length=500, default="")

@@ -1,0 +1,101 @@
+{% extends 'basic.html' %}
+
+{% block title %}Voting History{% endblock %}
+
+{% block profileActive %}active{% endblock %}
+
+{% load polls_extras %}
+
+{% block body %}
+<div class="container my-3 main">
+    {% if 'private' in request.GET %}
+    <h3 class="text-center mt-3 mb-3">Your Private Voting History</h3>
+    {% else %}
+    <h3 class="text-center mt-3 mb-3">Your Public Voting History</h3>
+    {% endif %}
+    <nav class="navbar navbar-expand navbar-light bg-light my-2">
+        <ul class="navbar-nav me-auto p-2 align-items-center">
+            <li class="nav-item">
+                <p class="mb-0">Select Polls: </p>
+            </li>
+            <li class="nav-item mx-2">
+                <a class="btn btn-sm btn-{% if 'private' in request.GET %}primary{% else %}warning{% endif %}"
+                    href="/polls/votinghistory" role="button"><i class="fas fa-poll"></i>Public</a>
+            </li>
+            <li class="nav-item">
+                <a class="btn btn-sm btn-{% if 'private' in request.GET %}warning{% else %}primary{% endif %}"
+                    href="?private=True" role="button"><i class="fas fa-poll"></i>Private</a>
+            </li>
+        </ul>
+    </nav>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if votes.has_previous %}
+            <li class="page-item">
+                <a class="page-link"
+                    href="{% my_url votes.previous_page_number 'page' request.GET.urlencode %}">Previous</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled"><a class="page-link text-dark" href="#" tabindex="-1"
+                    aria-disabled="true">Page {{votes.number}} of {{votes.paginator.num_pages}}</a></li>
+            {% if votes.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{% my_url votes.next_page_number 'page' request.GET.urlencode %}">Next</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    <div class="col-12">
+        <ul class="list-group">
+            {% for vote in votes %}
+            <li class="list-group-item col-12">
+                {% if vote.poll.isActive %}
+                {% if 'private' in request.GET %}
+                <p><a style="text-decoration: none; font-size: 22px;" href="/polls/privatepolldetails/{{vote.poll.id}}">Title: {{vote.poll.title|truncatechars:100}}</a></p>
+                {% else %}
+                <p><a style="text-decoration: none; font-size: 22px;" href="/polls/polldetails/{{vote.poll.id}}">Title: {{vote.poll.title|truncatechars:100}}</a></p>
+                {% endif %}
+                {% else %}
+                <p style="text-decoration: none; font-size: 22px;">Title: {{vote.poll.title}}</p>
+                {% endif %}
+                {% if request.user == vote.poll.owner %}
+                <p>Created by You <a href="/profile"><span class="badge bg-info">{{vote.poll.owner}}</span></a> on
+                    {{vote.poll.pub_date|date:"d M, Y H:m"}}.</p>
+                {% else %}
+                <p>Created by <a href="/userprofile/{{vote.poll.owner}}"><span
+                            class="badge bg-secondary">{{vote.poll.owner}}</span></a> on {{vote.poll.pub_date|date:"d M, Y H:m"}}.
+                </p>
+                {% endif %}
+                {% if vote.poll.isActive %}
+                <p>Ending On: {{vote.poll.endtime|date:"d M, Y H:m"}}, and you have voted for <b>{{vote.choice}}</b>.</p>
+                {% if 'private' in request.GET %}
+                <a href="/polls/privatepolldetails/{{vote.poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>
+                {% else %}
+                <a href="/polls/polldetails/{{vote.poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>
+                {% endif %}
+                {% else %}
+                <p>Ended on: {{vote.poll.endtime|date:"d M, Y H:m"}}, and you have voted for <b>{{vote.choice|truncatechars:100}}</b>.</p>
+                <p><b>Results: </b>
+                    {% if vote.poll.choice1_vote_count > vote.poll.choice2_vote_count %}
+                        Choice 1 (<b>{{vote.poll.choice1|truncatechars:100}}</b>) won by <b>{{vote.poll.choice1_vote_count}}</b> votes!
+                    {% elif vote.poll.choice1_vote_count == vote.poll.choice2_vote_count %}
+                        There was a tie between Choice 1 (<b>{{vote.poll.choice1|truncatechars:100}}</b>) and Choice 2 (<b>{{vote.poll.choice2|truncatechars:100}}</b>) as both secured <b>{{vote.poll.choice1_vote_count}}</b> votes!
+                    {% else %} 
+                        Choice 2 (<b>{{vote.poll.choice2|truncatechars:100}}</b>) won by <b>{{vote.poll.choice2_vote_count}}</b> votes!
+                    {% endif %}
+                </p>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

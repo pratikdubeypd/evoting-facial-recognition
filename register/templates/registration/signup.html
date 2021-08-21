@@ -2,11 +2,10 @@
 
 {% block title%}Signup - iVote{% endblock %}
 
+{% block homeActive %}active{% endblock %}
+
 {% block body %}
 <div class="container my-3 main">
-    {% if user.is_authenticated %}
-    <h4>You are already logged in.</h4>
-    {% else %}
     <h3 class="text-center">Welcome! Signup to iVote</h3>
     <hr>
     <div class="card h-100">
@@ -25,20 +24,23 @@
                 </div>
                 <div class="col-md-6">
                     <label for="email" class="form-label">Email:</label>
-                    <input type="email" class="form-control" name="email" id="email" placeholder="Enter your email"
-                        required>
+                    <input type="email" oninput="emailCheck()" class="form-control" name="email" id="email"
+                        placeholder="Enter your email" required>
+                    <b style="font-size: 12px;" id="emailsignal" class="text-danger"></b>
                 </div>
                 <div class="col-md-6">
                     <label for="phone" class="form-label">Phone Number:</label>
-                    <input type="tel" class="form-control" name="phone" pattern="[0-9]{10}"
-                        placeholder="Enter your phone number">
+                    <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}"
+                        oninput="phoneCheck()" placeholder="Enter your phone number">
+                    <b style="font-size: 12px;" id="phonesignal" class="text-danger"></b>
                 </div>
                 <div class="col-12">
                     <label for="username" class="form-label">Username:</label>
-                    <br>
+                    <br class="d-block d-md-none">
                     <b style="font-size: 12px;">(Note: You cannot change your username again.)</b>
-                    <input type="text" class="form-control" name="username" id="username"
+                    <input type="text" class="form-control" name="username" id="username" oninput="usernameCheck()"
                         placeholder="Choose a unique Username (Lowercase and AlphaNumeric)" required>
+                    <b style="font-size: 12px;" id="usernamesignal"></b>
                 </div>
                 <div class="col-md-6">
                     <label for="pass1" class="form-label">Password:</label>
@@ -51,8 +53,12 @@
                         placeholder="Enter your password again" required>
                 </div>
                 <div class="col-12">
+                    <input class="form-check-input" type="checkbox" value="" id="showpassword" name="showpassword">
+                    <label class="form-check-label" for="showpassword">Show Password</label>
+                </div>
+                <div class="col-12">
                     <label for="image" class="form-label">Profile Image:</label>
-                    <br>
+                    <br class="d-block d-md-none">
                     <b style="font-size: 12px;">(Note: This image will be used for future verification/authentication,
                         please upload a recent passport sized image.)</b>
                     <input type="file" class="form-control" name="image" id="image" accept="image/*" required>
@@ -70,6 +76,83 @@
     <div class="col-12 my-2">
         <p>Already have an account? <a href="/login" style="text-decoration: none;">Login here.</a></p>
     </div>
-    {% endif %}
 </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // notifying if the email exists
+    function emailCheck() {
+        const emails = '{{emails}}'
+        const cleanemails = JSON.parse(emails.replace(/&quot;/g, '"'))
+        var emailinput = document.getElementById('email').value
+        let filteredEmailArr = []
+        if (emailinput != "" && emailinput.length > 7) {
+            filteredEmailArr = cleanemails.filter(user => user['email'] == (emailinput))
+            if (filteredEmailArr.length > 0) {
+                emailsignal.innerHTML = `<span class="text-danger">Email already registered!</span>`
+            }
+            else {
+                emailsignal.innerHTML = `<span class="text-success">Email not registered!</span>`
+                filteredEmailArr = []
+            }
+        }
+        if (emailinput == "") {
+            emailsignal.innerHTML = ``
+        }
+    }
+    // notifying if the username exists
+    function usernameCheck() {
+        const usernames = '{{usernames}}'
+        const cleanusernames = JSON.parse(usernames.replace(/&quot;/g, '"'))
+        var usernameinput = document.getElementById('username').value
+        let filteredUsernameArr = []
+        if (usernameinput != "" && usernameinput.length > 3) {
+            filteredUsernameArr = cleanusernames.filter(user => user['username'] == (usernameinput))
+            if (filteredUsernameArr.length > 0) {
+                usernamesignal.innerHTML = `<span class="text-danger">Username already taken!</span>`
+            }
+            else {
+                usernamesignal.innerHTML = `<span class="text-success">Username available!</span>`
+                filteredUsernameArr = []
+            }
+        }
+        if (usernameinput == "") {
+            usernamesignal.innerHTML = ``
+        }
+    }
+    // notifying if the phone number exists
+    function phoneCheck() {
+        const phones = '{{phones}}'
+        const cleanphones = JSON.parse(phones.replace(/&quot;/g, '"'))
+        var phoneinput = document.getElementById('phone').value
+        let filteredPhoneArr = []
+        if (phoneinput != "" && phoneinput.length == 10) {
+            filteredPhoneArr = cleanphones.filter(user => user['phone'] == (phoneinput))
+            if (filteredPhoneArr.length > 0) {
+                phonesignal.innerHTML = `<span class="text-danger">Phone Number already registered!</span>`
+            }
+            else {
+                phonesignal.innerHTML = `<span class="text-success">Phone Number not registered!</span>`
+                filteredPhoneArr = []
+            }
+        }
+        if (phoneinput == "") {
+            phonesignal.innerHTML = ``
+        }
+    }
+    // show password
+    var passwordcheckbox = document.querySelector("input[name=showpassword]");
+    passwordcheckbox.addEventListener('change', function () {
+        const pass1 = document.getElementById('pass1')
+        const pass2 = document.getElementById('pass2')
+        if (pass1.type === 'password' && pass2.type === 'password') {
+            pass1.type = 'text';
+            pass2.type = 'text';
+        } else {
+            pass1.type = 'password';
+            pass2.type = 'password';
+        }
+    });
+</script>
 {% endblock %}

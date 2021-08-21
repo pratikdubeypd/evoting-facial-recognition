@@ -8,6 +8,7 @@ from django.core.validators import validate_email
 import os
 import face_recognition
 import cv2
+import json
 
 # Create your views here.
 
@@ -17,6 +18,9 @@ def home(request):
 
 
 def userLogin(request):
+    if request.user.is_authenticated:
+        messages.error(request, 'You\'re already logged in!')
+        return redirect('home')
     if request.method == 'POST':
         # Get the post parameters
         loginusername = request.POST['loginusername']
@@ -37,6 +41,9 @@ def userLogin(request):
 
 
 def signup(request):
+    if request.user.is_authenticated:
+        messages.error(request, 'You\'re already logged in!')
+        return redirect('home')
     if request.method == 'POST':
         # Get the post parameters
         fname = request.POST['fname']
@@ -54,9 +61,13 @@ def signup(request):
         except:
             messages.error(request, 'The given email does not exist!')
             return redirect('signup')
-        if len(username) > 40:
+        if len(username) > 50:
             messages.error(
-                request, 'Your username must be under 40 characters!')
+                request, 'Your username must be under 50 characters!')
+            return redirect('signup')
+        if len(username) < 3:
+            messages.error(
+                request, 'Your username must be of atleast 3 characters!')
             return redirect('signup')
         if not username.isalnum():
             messages.error(request, 'Your username must be alphanumeric!')
@@ -86,7 +97,12 @@ def signup(request):
         messages.success(
             request, 'Your account has been successfully created! Please login to continue.')
         return redirect('login')
-    return render(request, 'registration/signup.html')
+    else:
+        usernames = json.dumps(list(User.objects.values('username')))
+        emails = json.dumps(list(User.objects.values('email')))
+        phones = json.dumps(list(UserProfile.objects.values('phone')))
+        dict = {'usernames': usernames, 'emails': emails, 'phones': phones}
+        return render(request, 'registration/signup.html', dict)
 
 
 @login_required
@@ -189,8 +205,7 @@ def logoutHandler(request):
 
 @login_required
 def testface(request):
-    user = request.user
-    if facedetect(user.userprofile.head_shot.url):
+    if facedetect(request):
         messages.success(request, 'Facial authentication test was successful!')
         return redirect('profile')
     else:
@@ -201,12 +216,13 @@ def testface(request):
         return redirect('profile')
 
 
-def facedetect(img):
+@login_required
+def facedetect(request):
     BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     MEDIA_ROOT = os.path.join(BASE_DIR, 'register')
 
-    img = (str(MEDIA_ROOT)+img)
-    save_path = (str(MEDIA_ROOT)+'\\media\\userrecog\\userimage.png')
+    img = (str(MEDIA_ROOT)+request.user.userprofile.head_shot.url)
+    save_path = (str(MEDIA_ROOT)+f'\\media\\userrecog\\{request.user}.png')
 
     camera = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     i = 0

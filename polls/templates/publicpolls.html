@@ -128,16 +128,16 @@
             {% for poll in allPublicPolls %}
             <li class="list-group-item col-12">
                 <p><a style="text-decoration: none; font-size: 22px;"
-                        href="/polls/polldetails/{{poll.id}}">{{poll.title|truncatewords:50}}</a></p>
+                        href="/polls/polldetails/{{poll.id}}">{{poll.title|truncatechars:100}}</a></p>
                 {% if request.user == poll.owner %}
                 <p>Created by You <a href="/profile"><span class="badge bg-info">{{poll.owner}}</span></a> on
-                    {{poll.pub_date|date:"d M, Y H:m"}}</p>
+                    {{poll.pub_date|date:"d M, Y H:m"}}.</p>
                 {% else %}
                 <p>Created by <a href="/userprofile/{{poll.owner}}"><span
-                            class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}
+                            class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}.
                 </p>
                 {% endif %}
-                <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}</p>
+                <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}.</p>
                 <a href="/polls/polldetails/{{poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>
                 {% if request.user == poll.owner %}
                 <a class="btn btn-outline-primary" href="/polls/polldetails/{{poll.id}}/editpublicpoll" role="button">Edit poll</a>

@@ -23,4 +23,5 @@ urlpatterns = [
     path('invitations/acceptedinvites', views.acceptedinvites, name='acceptedinvites'),
     path('invitations/<int:poll_id>/invitechoice', views.invitechoice, name='invitechoice'),
     path('privatepolldetails/<int:poll_id>/results/', views.private_results, name='privateresults'),
+    path('votinghistory/', views.votingHistory, name='votinghistory'),
 ]
