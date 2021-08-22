@@ -5,26 +5,30 @@
 {% block publicPollsActive %}active{% endblock %}
 
 {% block body %}
+<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <div class="container my-3 main">
-    <h3 class="text-center">Results for poll {{publicpoll.title}}</h3>
+    <h3 class="text-center">Public Poll Results: {{publicpoll.title}}</h3>
     <hr>
     <div class="col-12">
         <h6>About this poll:</h6>
         {% if request.user == publicpoll.owner %}
-        <p>This poll is created by You <a href="/profile"><span class="badge bg-info">{{publicpoll.owner}}</span></a> on
+        <p>This poll was created by You <a href="/profile"><span class="badge bg-info">{{publicpoll.owner}}</span></a> on
             {{publicpoll.pub_date|date:"d M, Y H:m"}}
             and is
             ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.</p>
         {% else %}
-        <p>This poll is created by <a href="/userprofile/{{publicpoll.owner}}">
-            <span class="badge bg-secondary">{{publicpoll.owner}} </span></a> 
-            on {{publicpoll.pub_date|date:"d M, YH:m"}} and is ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.
+        <p>This poll was created by <a href="/userprofile/{{publicpoll.owner}}">
+                <span class="badge bg-secondary">{{publicpoll.owner}} </span></a>
+            on {{publicpoll.pub_date|date:"d M, Y H:m"}} and is ending on {{publicpoll.endtime|date:"d M, Y H:m"}}.
         </p>
         {% endif %}
         <h6>Description:</h6>
         <p>{{publicpoll.desc}}</p>
         {% if request.user == publicpoll.owner %}
-        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');" action="/polls/polldetails/{{publicpoll.id}}/deletepublicpoll" method="POST" class="row g-3">
+        <form onSubmit="return confirm('Are you sure you wish to delete this poll?');"
+            action="/polls/polldetails/{{publicpoll.id}}/deletepublicpoll" method="POST" class="row g-3">
             {% csrf_token %}
             <div class="col-12">
                 <button type="submit" name="delete" id="delete" class="btn btn-outline-danger" value="delete">Delete
@@ -34,24 +38,26 @@
         {% endif %}
     </div>
     <hr>
-    {% if hasVoted %}
-    <b>Results:</b>
-    <ul class="list-group">
+    <h6>Results:</h6>
+    <ul class="list-group mb-2">
+        <p>Total votes received: <b>{{ publicpoll.choice1_vote_count|add:publicpoll.choice2_vote_count }}</b></p>
         <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if publicpoll.choice1_vote_count > publicpoll.choice2_vote_count %}list-group-item-info{% elif publicpoll.choice1_vote_count == publicpoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice1 %}list-group-item-info{% endif %}">
             1. {{publicpoll.choice1}}
-            <span class="badge bg-primary rounded-pill">{{publicpoll.choice1_vote_count}}</span>
+            <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice1_vote_count}} votes</span>
         </li>
         <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if publicpoll.choice2_vote_count > publicpoll.choice1_vote_count %}list-group-item-info{% elif publicpoll.choice1_vote_count == publicpoll.choice2_vote_count %}list-group-item-warning{% endif %}">
+            class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice2 %}list-group-item-info{% endif %}">
             2. {{publicpoll.choice2}}
-            <span class="badge bg-primary rounded-pill">{{publicpoll.choice2_vote_count}}</span>
+            <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice2_vote_count}} votes</span>
         </li>
     </ul>
-    <div class="my-2">You have voted for {{publicvote.choice|truncatechars:100}}</div>
-    {% else %}
-    <p>Please go back and vote to see the results.</p>>
-    {% endif %}
+    <p>You have voted for <b>{{publicvote.choice|truncatechars:100}}</b></p>
+    <div class="card h-100">
+        <div class="card-body">
+            <div id="myChart"></div>
+        </div>
+    </div>
     <hr>
     <div class="col">
         <div class="card rounded-3 shadow-sm">
@@ -70,6 +76,66 @@
 
 {% block script %}
 <script>
+    // making ajax call
+    var pollId = '{{publicpoll.id}}'
+    var dataURL = `/polls/api/publicresultdata/${pollId}`
+    var state = {
+        'values': []
+    }
+    $.ajax({
+        method: 'GET',
+        url: dataURL,
+        success: function (response) {
+            for (var i in response) {
+                var value = Object.values(response[i])[0]
+                state.values.push(value)
+            }
+            buildChart()
+        }
+    })
+    // charts
+    function buildChart() {
+        var chartConfig = {
+            type: "bar",
+            plot: {
+                // animation
+                animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 1000
+                }
+            },
+            scaleX: {
+                label: {
+                    text: 'Choices',
+                    fontSize: 16,
+                },
+                labels: [
+                    'Choice 1',
+                    'Choice 2'
+                ]
+            },
+            scaleY: {
+                label: {
+                    text: 'Votes',
+                    fontSize: 16,
+                }
+            },
+            "series": [
+                {
+                    "values": state.values
+                }
+            ]
+        }
+
+        zingchart.render({
+            id: "myChart",
+            data: chartConfig,
+        })
+    }
+
+    // countdown for poll
     const countdownbox = document.getElementById('countdown-box')
     const end = '{{publicpoll.endtime|date:"d M, Y H:m:s"}}'
     // obtaining the countdown time in milliseconds

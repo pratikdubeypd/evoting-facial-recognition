@@ -18,9 +18,6 @@ def home(request):
 
 
 def userLogin(request):
-    if request.user.is_authenticated:
-        messages.error(request, 'You\'re already logged in!')
-        return redirect('home')
     if request.method == 'POST':
         # Get the post parameters
         loginusername = request.POST['loginusername']
@@ -37,6 +34,9 @@ def userLogin(request):
         else:
             messages.error(request, 'Invalid Credentials!')
             return redirect('login')
+    if request.user.is_authenticated:
+        messages.error(request, 'You\'re already logged in!')
+        return redirect('home')
     return render(request, 'registration/login.html')
 
 

@@ -8,7 +8,7 @@
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center mt-3 mb-3">Private polls list - created by you</h3>
+    <h3 class="text-center mt-3 mb-3">Private Polls - created by you</h3>
     <nav class="navbar navbar-expand-lg navbar-light bg-light my-2">
         <div class="container-fluid">
             <a class="btn btn-sm btn-primary" href="/polls/privatepolls" role="button"><i class="fas fa-poll"></i>Refresh</a>
@@ -113,7 +113,7 @@
             {% for poll in allPrivatePolls %}
             <li class="list-group-item col-12">
                 <p><a style="text-decoration: none; font-size: 22px;"
-                    href="/polls/privatepolldetails/{{poll.id}}">{{poll.title|truncatechars:100}}</a></p>
+                    href="/polls/privatepolldetails/{{poll.id}}">{{poll.title}}</a></p>
                 <p>Created by You on {{poll.pub_date|date:"d M, Y H:m"}}.</p>
                 <p>Ending On: {{poll.endtime|date:"d M, Y H:m"}}.</p>
                 <a href="/polls/privatepolldetails/{{poll.id}}" class="btn btn-outline-primary" role="button">See More...</a>

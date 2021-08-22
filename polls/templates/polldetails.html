@@ -11,11 +11,11 @@
     <div class="col-12">
         <h6>About this poll:</h6>
         {% if request.user == poll.owner %}
-        <p>This is a public poll and is created by You <a href="/profile"><span
+        <p>This poll was created by You <a href="/profile"><span
                     class="badge bg-info">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}} and is
             ending on {{poll.endtime|date:"d M, Y H:m"}}.</p>
         {% else %}
-        <p>This poll is created by <a href="/userprofile/{{poll.owner}}"><span
+        <p>This poll was created by <a href="/userprofile/{{poll.owner}}"><span
                     class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}} and is
             ending on {{poll.endtime|date:"d M, Y H:m"}}.</p>
         {% endif %}
@@ -33,15 +33,16 @@
     <hr>
     <div class="col-12">
         {% if hasVoted %}
-        <b>You have already voted!</b>
+        <h6>You have already voted!</h6>
         <p>The choices were:</p>
-        <ul class="list-group">
-            <li class="list-group-item">1. {{poll.choice1}}</li>
-            <li class="list-group-item">2. {{poll.choice2}}</li>
+        <ul class="list-group mb-2">
+            <li class="list-group-item {% if publicvote.choice == poll.choice1 %}list-group-item-info{% endif %}">1. {{poll.choice1}}</li>
+            <li class="list-group-item {% if publicvote.choice == poll.choice2 %}list-group-item-info{% endif %}">2. {{poll.choice2}}</li>
         </ul>
-        <a class="btn btn-primary mt-3" href="/polls/polldetails/{{poll.id}}/results" role="button">See Results</a>
+        <p>You have voted for <b>{{publicvote.choice|truncatechars:100}}</b></p>
+        <a class="btn btn-primary" href="/polls/polldetails/{{poll.id}}/results" role="button">See Results</a>
         {% else %}
-        <b>Please select your choice:</b>
+        <h6>Please select your choice:</h6>
         <form action="/polls/polldetails/{{poll.id}}/vote/" method="POST"> {% csrf_token %}
             <div class="form-check my-2">
                 <input class="form-check-input" type="radio" name="choice" id="choice1" value="{{poll.choice1}}"

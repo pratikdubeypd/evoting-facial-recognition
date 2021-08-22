@@ -5,13 +5,16 @@
 {% block profileActive %}active{% endblock %}
 
 {% block body %}
+<script src="https://cdn.zingchart.com/zingchart.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <div class="container my-3 main">
-    <h3 class="text-center">Private poll name: {{privatepoll.title}}</h3>
+    <h3 class="text-center">Private Poll Results: {{privatepoll.title}}</h3>
     <hr>
     <div class="col-12">
         <h6>About this poll:</h6>
         {% if request.user == privatepoll.owner %}
-        <p>This poll is created by You 
+        <p>This poll was created by You 
             <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> 
             on {{privatepoll.pub_date|date:"d M, Y H:m"}}
             and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.</p>
@@ -25,7 +28,7 @@
             </div>
         </form>
         {% else %}
-        <p>This poll is created by <a href="/userprofile/{{privatepoll.owner}}"><span
+        <p>This poll was created by <a href="/userprofile/{{privatepoll.owner}}"><span
                     class="badge bg-secondary">{{privatepoll.owner}}</span></a> on {{privatepoll.pub_date|date:"d M, Y H:m"}} 
                     and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}.
         </p>
@@ -34,24 +37,25 @@
         {% endif %}
     </div>
     <hr>
-    {% if hasVoted %}
-    <b>Results:</b>
-    <ul class="list-group">
-        <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice1_vote_count > privatepoll.choice2_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
-            1. {{privatepoll.choice1}}...
-            <span class="badge bg-primary rounded-pill">{{privatepoll.choice1_vote_count}}</span>
+    <h6>Results:</h6>
+    <ul class="list-group mb-2">
+        <p>Total votes received: <b>{{ privatepoll.choice1_vote_count|add:privatepoll.choice2_vote_count }}</b></p>
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice1 %}list-group-item-info{% endif %}">
+            1. {{privatepoll.choice1}}
+            <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice1_vote_count}} votes</span>
         </li>
         <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if privatepoll.choice2_vote_count > privatepoll.choice1_vote_count %}list-group-item-info{% elif privatepoll.choice1_vote_count == privatepoll.choice2_vote_count %}list-group-item-warning{% endif %}">
-            2. {{privatepoll.choice2}}...
-            <span class="badge bg-primary rounded-pill">{{privatepoll.choice2_vote_count}}</span>
+            class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice2 %}list-group-item-info{% endif %}">
+            2. {{privatepoll.choice2}}
+            <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice2_vote_count}} votes</span>
         </li>
     </ul>
-    <div class="my-2">You have voted for {{privatevote.choice|truncatechars:100}}</div>
-    {% else %}
-    <p>Please go back and vote to see the results.</p>
-    {% endif %}
+    <p>You have voted for <b>{{privatevote.choice|truncatechars:100}}</b></p>
+    <div class="card h-100">
+        <div class="card-body">
+            <div id="myChart"></div>
+        </div>
+    </div>
     <hr>
     <div class="col">
         <div class="card rounded-3 shadow-sm">
@@ -70,6 +74,65 @@
 
 {% block script %}
 <script>
+    // making ajax call
+    var pollId = '{{privatepoll.id}}'
+    var dataURL = `/polls/api/privateresultdata/${pollId}`
+    var state = {
+        'values': []
+    }
+    $.ajax({
+        method: 'GET',
+        url: dataURL,
+        success: function (response) {
+            for (var i in response) {
+                var value = Object.values(response[i])[0]
+                state.values.push(value)
+            }
+            buildChart()
+        }
+    })
+    // charts
+    function buildChart() {
+        var chartConfig = {
+            type: "bar",
+            plot: {
+                // animation
+                animation: {
+                    effect: 'ANIMATION_EXPAND_BOTTOM',
+                    method: 'ANIMATION_STRONG_EASE_OUT',
+                    sequence: 'ANIMATION_BY_NODE',
+                    speed: 1000
+                }
+            },
+            scaleX: {
+                label: {
+                    text: 'Choices',
+                    fontSize: 16,
+                },
+                labels: [
+                    'Choice 1',
+                    'Choice 2'
+                ]
+            },
+            scaleY: {
+                label: {
+                    text: 'Votes',
+                    fontSize: 16,
+                }
+            },
+            "series": [
+                {
+                    "values": state.values
+                }
+            ]
+        }
+
+        zingchart.render({
+            id: "myChart",
+            data: chartConfig,
+        })
+    }
+
     const countdownbox = document.getElementById('countdown-box')
     const end = '{{privatepoll.endtime|date:"d M, Y H:m:s"}}'
     // obtaining the countdown time in milliseconds

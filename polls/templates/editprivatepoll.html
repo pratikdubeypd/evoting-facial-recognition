@@ -1,12 +1,12 @@
 {% extends 'basic.html' %}
 
-{% block title %}Edit Private Polls{% endblock %}
+{% block title %}Edit Private Polls - {{privatepoll.title}}{% endblock %}
 
 {% block profileActive %}active{% endblock %}
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center">Edit the Private Poll: {{privatepoll.title}}</h3>
+    <h3 class="text-center">Edit the Private Poll {{privatepoll.title}}</h3>
     <hr>
     <div class="card h-100">
         <div class="card-body">

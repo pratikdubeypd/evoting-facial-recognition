@@ -8,7 +8,7 @@
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center mt-3 mb-3">Public polls list</h3>
+    <h3 class="text-center mt-3 mb-3">Public Polls</h3>
     <nav class="navbar navbar-expand-lg navbar-light bg-light my-2">
         <div class="container-fluid">
             <a class="btn btn-sm btn-primary" href="/polls/publicpolls" role="button"><i
@@ -128,10 +128,9 @@
             {% for poll in allPublicPolls %}
             <li class="list-group-item col-12">
                 <p><a style="text-decoration: none; font-size: 22px;"
-                        href="/polls/polldetails/{{poll.id}}">{{poll.title|truncatechars:100}}</a></p>
+                        href="/polls/polldetails/{{poll.id}}">{{poll.title}}</a></p>
                 {% if request.user == poll.owner %}
-                <p>Created by You <a href="/profile"><span class="badge bg-info">{{poll.owner}}</span></a> on
-                    {{poll.pub_date|date:"d M, Y H:m"}}.</p>
+                <p>Created by You on {{poll.pub_date|date:"d M, Y H:m"}}.</p>
                 {% else %}
                 <p>Created by <a href="/userprofile/{{poll.owner}}"><span
                             class="badge bg-secondary">{{poll.owner}}</span></a> on {{poll.pub_date|date:"d M, Y H:m"}}.

@@ -1,18 +1,16 @@
 {% extends 'basic.html' %}
 
-{% block title %}Invite people to vote{% endblock %}
+{% block title %}Invite people - {{privatepoll.title}}{% endblock %}
 
 {% block profileActive %}active{% endblock %}
 
 {% block body %}
 <div class="container my-3 main">
-    <h3 class="text-center">Invite to Private Poll {{privatepoll.title|truncatechars:50}}</h3>
+    <h3 class="text-center">Invite to Private Poll {{privatepoll.title}}</h3>
     <hr>
     <div class="col-12">
         <h6>About this poll:</h6>
-        <p>This poll is created by You 
-            <a href="/profile"><span class="badge bg-info">{{privatepoll.owner}}</span></a> 
-            on {{privatepoll.pub_date|date:"d M, Y H:m"}}
+        <p>This poll was created by You on {{privatepoll.pub_date|date:"d M, Y H:m"}}
             and is ending on {{privatepoll.endtime|date:"d M, Y H:m"}}</p>
         <h6>Description:</h6>
         <p>{{privatepoll.desc|truncatechars:200}}</p>
@@ -29,7 +27,7 @@
         <ul class="list-group">
             {% if privateinvites %}
             {% for p in privateinvites %}
-            {% if p.isActive %}
+            {% if p.isActive and p.is_accepted != True %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
                 <form onSubmit="return confirm('Are you sure you wish to revoke this invitation?');" action="/polls/privateinvite/{{privatepoll.id}}" method="POST" class="row g-3">
                     {% csrf_token %}
@@ -41,11 +39,11 @@
             </li>
             {% elif p.is_accepted %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
-                <a class="btn btn-sm btn-success" href="#" role="button">Invitation Accepted</a>
+                <button type="button" class="btn btn-sm btn-success">Invitation Accepted</button>
             </li>
             {% else %}
             <li class="list-group-item d-flex justify-content-between align-items-start">{{p.userinvited}}
-                <a class="btn btn-sm btn-warning" href="#" role="button">Invitation Rejected/Revoked</a>
+                <button type="button" class="btn btn-sm btn-warning">Invitation Rejected/Revoked</button>
             </li>
             {% endif %}
             {% endfor %}

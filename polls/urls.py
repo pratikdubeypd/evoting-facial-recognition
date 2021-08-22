@@ -24,4 +24,6 @@ urlpatterns = [
     path('invitations/<int:poll_id>/invitechoice', views.invitechoice, name='invitechoice'),
     path('privatepolldetails/<int:poll_id>/results/', views.private_results, name='privateresults'),
     path('votinghistory/', views.votingHistory, name='votinghistory'),
+    path('api/publicresultdata/<int:poll_id>', views.publicResultData, name='publicresultdata'),
+    path('api/privateresultdata/<int:poll_id>', views.privateResultData, name='privateresultdata'),
 ]

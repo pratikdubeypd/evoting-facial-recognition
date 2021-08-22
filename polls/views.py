@@ -8,6 +8,7 @@ from django.shortcuts import redirect, render
 from .models import Publicpoll, Privatepoll, Publicvote, Privatevote, Privateinvite
 from django.contrib.auth.decorators import login_required
 import json
+from django.http import JsonResponse
 import os
 import face_recognition
 import cv2
@@ -159,9 +160,9 @@ def createPublicPoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
-        if len(title) > 400:
+        if len(title) > 50:
             messages.error(
-                request, 'Your title must be under 400 characters!')
+                request, 'Your title must be under 50 characters!')
             return render(request, 'createpolls.html')
         if len(desc) > 1000:
             messages.error(
@@ -197,9 +198,9 @@ def createPrivatePoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
-        if len(title) > 400:
+        if len(title) > 50:
             messages.error(
-                request, 'Your title must be under 400 characters!')
+                request, 'Your title must be under 50 characters!')
             return render(request, 'createpolls.html')
         if len(desc) > 1000:
             messages.error(
@@ -510,8 +511,10 @@ def publicpolldetails(request, poll_id):
     publicpoll = Publicpoll.objects.filter(id=poll_id).first()
     if publicpoll is not None:
         if publicpoll.isActive:
+            publicvote = Publicvote.objects.filter(user=request.user, poll=publicpoll).first()
             hasVoted = Publicvote.objects.filter(user=request.user, poll=publicpoll).exists()
-            return render(request, 'polldetails.html', {'poll': publicpoll, 'hasVoted': hasVoted})
+            dict = {'publicvote': publicvote, 'poll': publicpoll, 'hasVoted': hasVoted}
+            return render(request, 'polldetails.html', dict)
         else:
             messages.error(request, 'The poll is not active anymore :(')
             return redirect('publicpolls')
@@ -531,9 +534,10 @@ def privatepolldetails(request, poll_id):
             hasAccess = False
         if privatepoll.owner == request.user or hasAccess == True:
             if privatepoll.isActive:
-                hasVoted = Privatevote.objects.filter(
-                    user=request.user, poll=privatepoll).exists()
-                return render(request, 'privatepolldetails.html', {'poll': privatepoll, 'hasVoted': hasVoted})
+                privatevote = Privatevote.objects.filter(user=request.user, poll=privatepoll).first()
+                hasVoted = Privatevote.objects.filter(user=request.user, poll=privatepoll).exists()
+                dict = {'privatevote': privatevote, 'poll': privatepoll, 'hasVoted': hasVoted}
+                return render(request, 'privatepolldetails.html', dict)
             else:
                 messages.error(
                     request, 'The poll is not active anymore :(')
@@ -776,13 +780,14 @@ def public_results(request, poll_id):
     publicpoll = Publicpoll.objects.filter(id=poll_id).first()
     if publicpoll is not None:
         if publicpoll.isActive:
-            publicvote = Publicvote.objects.filter(
-                user=request.user, poll=publicpoll).first()
-            hasVoted = Publicvote.objects.filter(
-                user=request.user, poll=publicpoll).exists()
-            dict = {'publicpoll': publicpoll,
-                    'publicvote': publicvote, 'hasVoted': hasVoted}
-            return render(request, 'publicresults.html', dict)
+            hasVoted = Publicvote.objects.filter(user=request.user, poll=publicpoll).exists()
+            if hasVoted:
+                publicvote = Publicvote.objects.filter(user=request.user, poll=publicpoll).first()
+                dict = {'publicpoll': publicpoll, 'publicvote': publicvote}
+                return render(request, 'publicresults.html', dict)
+            else:
+                messages.error(request, 'Please cast your vote first to see the results!')
+                return redirect('polldetails', poll_id=poll_id)
         else:
             messages.error(request, 'The poll is not active anymore :(')
             return redirect('publicpolls')
@@ -802,19 +807,45 @@ def private_results(request, poll_id):
             hasAccess = False
         if privatepoll.owner == request.user or hasAccess == True:
             if privatepoll.isActive:
-                privatevote = Privatevote.objects.filter(
-                    user=request.user, poll=privatepoll).first()
-                hasVoted = Privatevote.objects.filter(
-                    user=request.user, poll=privatepoll).exists()
-                dict = {'privatepoll': privatepoll, 'privatevote': privatevote,
-                        'hasVoted': hasVoted}
-                return render(request, 'privateresults.html', dict)
+                hasVoted = Privatevote.objects.filter(user=request.user, poll=privatepoll).exists()
+                if hasVoted:
+                    privatevote = Privatevote.objects.filter(user=request.user, poll=privatepoll).first()
+                    dict = {'privatepoll': privatepoll, 'privatevote': privatevote}
+                    return render(request, 'privateresults.html', dict)
+                else:
+                    messages.error(request, 'Please cast your vote first to see the results!')
+                    return redirect('privatepolldetails', poll_id=poll_id)
             else:
                 messages.error(request, 'The poll is not active anymore :(')
                 return redirect('privatepolls')
         else:
             messages.error(request, 'You do not have access to this poll.')
             return redirect('privatepolls')
+    else:
+        messages.error(request, 'No such poll exists :(')
+        return redirect('privatepolls')
+
+
+# charts api
+@login_required
+def publicResultData(request, poll_id):
+    publicrefresh()
+    publicpoll = Publicpoll.objects.filter(id=poll_id).first()
+    if publicpoll is not None:
+        choices = [{publicpoll.choice1 : publicpoll.choice1_vote_count}, {publicpoll.choice2 : publicpoll.choice2_vote_count}]
+        return JsonResponse(choices, safe=False)
+    else:
+        messages.error(request, 'No such poll exists :(')
+        return redirect('publicpolls')
+
+
+@login_required
+def privateResultData(request, poll_id):
+    privaterefresh()
+    privatepoll = Privatepoll.objects.filter(id=poll_id).first()
+    if privatepoll is not None:
+        choices = [{privatepoll.choice1 : privatepoll.choice1_vote_count}, {privatepoll.choice2 : privatepoll.choice2_vote_count}]
+        return JsonResponse(choices, safe=False)
     else:
         messages.error(request, 'No such poll exists :(')
         return redirect('privatepolls')
