@@ -160,6 +160,11 @@ def createPublicPoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
+        now = datetime.datetime.now()
+        if endtime < str(now):
+            messages.error(
+                request, 'Please enter a valid day to end the poll!')
+            return render(request, 'createpolls.html')
         if len(title) > 50:
             messages.error(
                 request, 'Your title must be under 50 characters!')
@@ -198,6 +203,11 @@ def createPrivatePoll(request):
         choice2 = request.POST['choice2']
         genre = request.POST['genre']
         endtime = request.POST['endtime']
+        now = datetime.datetime.now()
+        if endtime < str(now):
+            messages.error(
+                request, 'Please enter a valid day to end the poll!')
+            return render(request, 'createpolls.html')
         if len(title) > 50:
             messages.error(
                 request, 'Your title must be under 50 characters!')
