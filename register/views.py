@@ -6,7 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.core.validators import validate_email
 import os
-import face_recognition
+import faceverification
 import cv2
 import json
 
@@ -233,20 +233,11 @@ def facedetect(request):
     del(camera)
     cv2.destroyAllWindows()
 
-    picture_of_user = face_recognition.load_image_file(img)
-    my_face_encoding = face_recognition.face_encodings(picture_of_user)[0]
-
-    try:
-        unknown_picture = face_recognition.load_image_file(save_path)
-        unknown_face_encoding = face_recognition.face_encodings(unknown_picture)[
-            0]
-    except:
-        return False
-    else:
-        results = face_recognition.compare_faces(
-            [my_face_encoding], unknown_face_encoding)
-
-        if results[0] == True:
+    if faceverification.detect_face(save_path) and faceverification.detect_face(img):
+        faces = [faceverification.extract_face(image) for image in [img, save_path]]
+        if faceverification.compare_faces(faces):
             return True
         else:
             return False
+    else:
+        return False
