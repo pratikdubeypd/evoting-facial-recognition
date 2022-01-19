@@ -158,9 +158,21 @@ def createPublicPoll(request):
         desc = request.POST['desc']
         choice1 = request.POST['choice1']
         choice2 = request.POST['choice2']
+        choice3 = ""
+        choice4 = ""
         genre = request.POST['genre']
         endtime = request.POST['endtime']
         now = datetime.datetime.now()
+        if request.POST.get('choice3'):
+            choice3 = request.POST['choice3']
+            if len(choice3) > 500:
+                messages.error(request, 'Your 3rd choice is too long!')
+                return render(request, 'createpolls.html')
+        if request.POST.get('choice4'):
+            choice4 = request.POST['choice4']
+            if len(choice4) > 500:
+                messages.error(request, 'Your 4th choice is too long!')
+                return render(request, 'createpolls.html')
         if endtime < str(now):
             messages.error(
                 request, 'Please enter a valid day to end the poll!')
@@ -183,7 +195,7 @@ def createPublicPoll(request):
             messages.error(request, 'Be more creative!')
             return render(request, 'createpolls.html')
         publicpoll = Publicpoll(owner=owner, title=title, desc=desc, isActive=True,
-                                endtime=endtime, choice1=choice1, choice2=choice2, genre=genre)
+                                endtime=endtime, choice1=choice1, choice2=choice2, choice3=choice3, choice4=choice4, genre=genre)
         publicpoll.save()
         messages.success(request, 'Your public poll has been created.')
         return redirect('publicpolls')
@@ -201,9 +213,21 @@ def createPrivatePoll(request):
         desc = request.POST['desc']
         choice1 = request.POST['choice1']
         choice2 = request.POST['choice2']
+        choice3 = ""
+        choice4 = ""
         genre = request.POST['genre']
         endtime = request.POST['endtime']
         now = datetime.datetime.now()
+        if request.POST.get('choice3'):
+            choice3 = request.POST['choice3']
+            if len(choice3) > 500:
+                messages.error(request, 'Your 3rd choice is too long!')
+                return render(request, 'createpolls.html')
+        if request.POST.get('choice4'):
+            choice4 = request.POST['choice4']
+            if len(choice4) > 500:
+                messages.error(request, 'Your 4th choice is too long!')
+                return render(request, 'createpolls.html')
         if endtime < str(now):
             messages.error(
                 request, 'Please enter a valid day to end the poll!')
@@ -223,7 +247,7 @@ def createPrivatePoll(request):
             messages.error(request, 'Your 2nd choice is too long!')
             return render(request, 'createpolls.html')
         privatepoll = Privatepoll(owner=owner, title=title, desc=desc, isActive=True,
-                                  endtime=endtime, choice1=choice1, choice2=choice2, genre=genre)
+                                  endtime=endtime, choice1=choice1, choice2=choice2, choice3=choice3, choice4=choice4, genre=genre)
         privatepoll.save()
         messages.success(request, 'Your private poll has been created.')
         return redirect('privatepolls')
@@ -241,12 +265,43 @@ def editpublicpoll(request, poll_id):
         if user is not None:
             publicpoll = Publicpoll.objects.filter(owner=request.user, id=poll_id, isActive=True).first()
             if publicpoll is not None:
+                publicvote = Publicvote.objects.filter(poll=publicpoll)
                 title = request.POST['title']
                 desc = request.POST['desc']
                 choice1 = request.POST['choice1']
                 choice2 = request.POST['choice2']
+                choice3 = ""
+                choice4 = ""
                 genre = request.POST['genre']
                 endtime = request.POST['endtime']
+                if request.POST.get('choice3'):
+                    choice3 = request.POST['choice3']
+                    if publicpoll.choice3 == choice3:
+                        messages.error(request, 'No change in the 3rd choice was detected!')
+                        return redirect('editpublicpoll', poll_id=poll_id)
+                    if len(choice3) > 500:
+                        messages.error(request, 'Your 3rd choice is too long!')
+                        return redirect('editpublicpoll', poll_id=poll_id)
+                    if choice3 != '':
+                        for p in publicvote:
+                            if p.choice == publicpoll.choice3:
+                                p.choice = choice3
+                                p.save()
+                        publicpoll.choice3 = choice3
+                if request.POST.get('choice4'):
+                    choice4 = request.POST['choice4']
+                    if publicpoll.choice4 == choice4:
+                        messages.error(request, 'No change in the 4th choice was detected!')
+                        return redirect('editpublicpoll', poll_id=poll_id)
+                    if len(choice4) > 500:
+                        messages.error(request, 'Your 4th choice is too long!')
+                        return redirect('editpublicpoll', poll_id=poll_id)
+                    if choice4 != '':
+                        for p in publicvote:
+                            if p.choice == publicpoll.choice4:
+                                p.choice = choice4
+                                p.save()
+                        publicpoll.choice4 = choice4
                 if publicpoll.title == title:
                     messages.error(request, 'No change in the title was detected!')
                     return redirect('editpublicpoll', poll_id=poll_id)
@@ -282,8 +337,16 @@ def editpublicpoll(request, poll_id):
                 if title != '':
                     publicpoll.title = title 
                 if choice1 != '':
+                    for p in publicvote:
+                        if p.choice == publicpoll.choice1:
+                            p.choice = choice1
+                            p.save()
                     publicpoll.choice1 = choice1
                 if choice2 != '':
+                    for p in publicvote:
+                        if p.choice == publicpoll.choice2:
+                            p.choice = choice2
+                            p.save()
                     publicpoll.choice2 = choice2
                 if desc != '':
                     publicpoll.desc == desc
@@ -328,12 +391,43 @@ def editprivatepoll(request, poll_id):
             privatepoll = Privatepoll.objects.filter(owner=request.user, id=poll_id, isActive=True).first()
             if privatepoll is not None:
                 if facedetect(request):
+                    privatevote = Privatevote.objects.filter(poll=privatepoll)
                     title = request.POST['title']
                     desc = request.POST['desc']
                     choice1 = request.POST['choice1']
                     choice2 = request.POST['choice2']
+                    choice3 = ""
+                    choice4 = ""
                     genre = request.POST['genre']
                     endtime = request.POST['endtime']
+                    if request.POST.get('choice3'):
+                        choice3 = request.POST['choice3']
+                        if privatepoll.choice3 == choice3:
+                            messages.error(request, 'No change in the 3rd choice was detected!')
+                            return redirect('editprivatepoll', poll_id=poll_id)
+                        if len(choice3) > 500:
+                            messages.error(request, 'Your 3rd choice is too long!')
+                            return redirect('editprivatepoll', poll_id=poll_id)
+                        if choice3 != '':
+                            for p in privatevote:
+                                if p.choice == privatepoll.choice3:
+                                    p.choice = choice3
+                                    p.save()
+                            privatepoll.choice3 = choice3
+                    if request.POST.get('choice4'):
+                        choice4 = request.POST['choice4']
+                        if privatepoll.choice4 == choice4:
+                            messages.error(request, 'No change in the 4th choice was detected!')
+                            return redirect('editprivatepoll', poll_id=poll_id)
+                        if len(choice4) > 500:
+                            messages.error(request, 'Your 4th choice is too long!')
+                            return redirect('editprivatepoll', poll_id=poll_id)
+                        if choice4 != '':
+                            for p in privatevote:
+                                if p.choice == privatepoll.choice4:
+                                    p.choice = choice4
+                                    p.save()
+                            privatepoll.choice4 = choice4
                     if privatepoll.title == title:
                         messages.error(request, 'No change in the title was detected!')
                         return redirect('editprivatepoll', poll_id=poll_id)
@@ -369,8 +463,16 @@ def editprivatepoll(request, poll_id):
                     if title != '':
                         privatepoll.title = title 
                     if choice1 != '':
+                        for p in privatevote:
+                            if p.choice == privatepoll.choice1:
+                                p.choice = choice1
+                                p.save()
                         privatepoll.choice1 = choice1
                     if choice2 != '':
+                        for p in privatevote:
+                            if p.choice == privatepoll.choice2:
+                                p.choice = choice2
+                                p.save()
                         privatepoll.choice2 = choice2
                     if desc != '':
                         privatepoll.desc == desc
@@ -577,6 +679,10 @@ def public_vote(request, poll_id):
                     publicpoll.choice1_vote_count += 1
                 elif choice == publicpoll.choice2:
                     publicpoll.choice2_vote_count += 1
+                elif choice == publicpoll.choice3:
+                    publicpoll.choice3_vote_count += 1
+                elif choice == publicpoll.choice4:
+                    publicpoll.choice4_vote_count += 1
                 publicpoll.save()
                 messages.success(request, 'Successfully voted!')
             return redirect('publicresults', poll_id=poll_id)
@@ -607,6 +713,10 @@ def private_vote(request, poll_id):
                         privatepoll.choice1_vote_count += 1
                     elif choice == privatepoll.choice2:
                         privatepoll.choice2_vote_count += 1
+                    elif choice == privatepoll.choice3:
+                        privatepoll.choice3_vote_count += 1
+                    elif choice == privatepoll.choice4:
+                        privatepoll.choice4_vote_count += 1
                     privatepoll.save()
                     messages.success(
                         request, 'Facial authentication was successful and you have successfully voted!')
@@ -842,6 +952,12 @@ def publicResultData(request, poll_id):
     publicrefresh()
     publicpoll = Publicpoll.objects.filter(id=poll_id).first()
     if publicpoll is not None:
+        if publicpoll.choice3 != "":
+            choices = [{publicpoll.choice1 : publicpoll.choice1_vote_count}, {publicpoll.choice2 : publicpoll.choice2_vote_count}, {publicpoll.choice3 : publicpoll.choice3_vote_count}]
+            return JsonResponse(choices, safe=False)
+        if publicpoll.choice4 != "":
+            choices = [{publicpoll.choice1 : publicpoll.choice1_vote_count}, {publicpoll.choice2 : publicpoll.choice2_vote_count}, {publicpoll.choice3 : publicpoll.choice3_vote_count}, {publicpoll.choice4 : publicpoll.choice4_vote_count}]
+            return JsonResponse(choices, safe=False)
         choices = [{publicpoll.choice1 : publicpoll.choice1_vote_count}, {publicpoll.choice2 : publicpoll.choice2_vote_count}]
         return JsonResponse(choices, safe=False)
     else:
@@ -854,6 +970,12 @@ def privateResultData(request, poll_id):
     privaterefresh()
     privatepoll = Privatepoll.objects.filter(id=poll_id).first()
     if privatepoll is not None:
+        if privatepoll.choice3 != "":
+            choices = [{privatepoll.choice1 : privatepoll.choice1_vote_count}, {privatepoll.choice2 : privatepoll.choice2_vote_count}, {privatepoll.choice3 : privatepoll.choice3_vote_count}]
+            return JsonResponse(choices, safe=False)
+        if privatepoll.choice4 != "":
+            choices = [{privatepoll.choice1 : privatepoll.choice1_vote_count}, {privatepoll.choice2 : privatepoll.choice2_vote_count}, {privatepoll.choice3 : privatepoll.choice3_vote_count}, {privatepoll.choice4 : privatepoll.choice4_vote_count}]
+            return JsonResponse(choices, safe=False)
         choices = [{privatepoll.choice1 : privatepoll.choice1_vote_count}, {privatepoll.choice2 : privatepoll.choice2_vote_count}]
         return JsonResponse(choices, safe=False)
     else:

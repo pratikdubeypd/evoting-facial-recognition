@@ -84,12 +84,13 @@
                 {% else %}
                 <p>Ended on: {{vote.poll.endtime|date:"d M, Y H:m"}}, and you have voted for <b>{{vote.choice|truncatechars:100}}</b>.</p>
                 <p><b>Results: </b>
-                    {% if vote.poll.choice1_vote_count > vote.poll.choice2_vote_count %}
-                        Choice 1 (<b>{{vote.poll.choice1|truncatechars:100}}</b>) won by <b>{{vote.poll.choice1_vote_count}}</b> votes!
-                    {% elif vote.poll.choice1_vote_count == vote.poll.choice2_vote_count %}
-                        There was a tie between Choice 1 (<b>{{vote.poll.choice1|truncatechars:100}}</b>) and Choice 2 (<b>{{vote.poll.choice2|truncatechars:100}}</b>) as both secured <b>{{vote.poll.choice1_vote_count}}</b> votes!
-                    {% else %} 
-                        Choice 2 (<b>{{vote.poll.choice2|truncatechars:100}}</b>) won by <b>{{vote.poll.choice2_vote_count}}</b> votes!
+                    <p>Choice 1 (<b>{{vote.poll.choice1|truncatechars:50}}</b>) received <b>{{vote.poll.choice1_vote_count}}</b> votes!</p>
+                    <p>Choice 2 (<b>{{vote.poll.choice2|truncatechars:50}}</b>) received <b>{{vote.poll.choice2_vote_count}}</b> votes!</p>
+                    {% if vote.poll.choice3 != "" %}
+                    <p>Choice 3 (<b>{{vote.poll.choice3|truncatechars:50}}</b>) received <b>{{vote.poll.choice3_vote_count}}</b> votes!</p>
+                    {% endif %}
+                    {% if vote.poll.choice4 != "" %}
+                    <p>Choice 4 (<b>{{vote.poll.choice4|truncatechars:50}}</b>) received <b>{{vote.poll.choice4_vote_count}}</b> votes!</p>
                     {% endif %}
                 </p>
                 {% endif %}

@@ -38,6 +38,12 @@
         <ul class="list-group mb-2">
             <li class="list-group-item {% if publicvote.choice == poll.choice1 %}list-group-item-info{% endif %}">1. {{poll.choice1}}</li>
             <li class="list-group-item {% if publicvote.choice == poll.choice2 %}list-group-item-info{% endif %}">2. {{poll.choice2}}</li>
+            {% if poll.choice3 != "" %}
+            <li class="list-group-item {% if publicvote.choice == poll.choice3 %}list-group-item-info{% endif %}">3. {{poll.choice3}}</li>
+            {% endif %}
+            {% if poll.choice4 != "" %}
+            <li class="list-group-item {% if publicvote.choice == poll.choice4 %}list-group-item-info{% endif %}">4. {{poll.choice4}}</li>
+            {% endif %}
         </ul>
         <p>You have voted for <b>{{publicvote.choice|truncatechars:100}}</b></p>
         <a class="btn btn-primary" href="/polls/polldetails/{{poll.id}}/results" role="button">See Results</a>
@@ -49,11 +55,25 @@
                     required>
                 <label class="form-check-label" for="choice2">{{poll.choice1}}</label>
             </div>
-            <div class="form-check">
+            <div class="form-check my-2">
                 <input class="form-check-input" type="radio" name="choice" id="choice2" value="{{poll.choice2}}"
                     required>
                 <label class="form-check-label" for="choice2">{{poll.choice2}}</label>
             </div>
+            {% if poll.choice3 != "" %}
+            <div class="form-check my-2">
+                <input class="form-check-input" type="radio" name="choice" id="choice3" value="{{poll.choice3}}"
+                    required>
+                <label class="form-check-label" for="choice3">{{poll.choice3}}</label>
+            </div>
+            {% endif %}
+            {% if poll.choice4 != "" %}
+            <div class="form-check my-2">
+                <input class="form-check-input" type="radio" name="choice" id="choice4" value="{{poll.choice4}}"
+                    required>
+                <label class="form-check-label" for="choice4">{{poll.choice4}}</label>
+            </div>
+            {% endif %}
             <input type="submit" value="Vote" class="btn btn-primary mt-3">
             <a class="btn btn-warning mt-3" href="/polls/polldetails/{{poll.id}}" role="button">Uncheck</a>
         </form>

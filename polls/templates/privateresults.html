@@ -39,16 +39,27 @@
     <hr>
     <h6>Results:</h6>
     <ul class="list-group mb-2">
-        <p>Total votes received: <b>{{ privatepoll.choice1_vote_count|add:privatepoll.choice2_vote_count }}</b></p>
+        <p>Total votes received: <b>{{ privatepoll.choice1_vote_count|add:privatepoll.choice2_vote_count|add:privatepoll.choice3_vote_count|add:privatepoll.choice4_vote_count }}</b></p>
         <li class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice1 %}list-group-item-info{% endif %}">
             1. {{privatepoll.choice1}}
             <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice1_vote_count}} votes</span>
         </li>
-        <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice2 %}list-group-item-info{% endif %}">
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice2 %}list-group-item-info{% endif %}">
             2. {{privatepoll.choice2}}
             <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice2_vote_count}} votes</span>
         </li>
+        {% if privatepoll.choice3 != "" %}
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice3 %}list-group-item-info{% endif %}">
+            3. {{privatepoll.choice3}}
+            <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice3_vote_count}} votes</span>
+        </li>
+        {% endif %}
+        {% if privatepoll.choice4 != "" %}
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if privatevote.choice == privatepoll.choice4 %}list-group-item-info{% endif %}">
+            4. {{privatepoll.choice4}}
+            <span class="badge bg-primary rounded-pill mx-2">{{privatepoll.choice4_vote_count}} votes</span>
+        </li>
+        {% endif %}
     </ul>
     <p>You have voted for <b>{{privatevote.choice|truncatechars:100}}</b></p>
     <div class="card h-100">
@@ -111,7 +122,9 @@
                 },
                 labels: [
                     'Choice 1',
-                    'Choice 2'
+                    'Choice 2',
+                    'Choice 3',
+                    'Choice 4'
                 ]
             },
             scaleY: {

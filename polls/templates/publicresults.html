@@ -40,17 +40,27 @@
     <hr>
     <h6>Results:</h6>
     <ul class="list-group mb-2">
-        <p>Total votes received: <b>{{ publicpoll.choice1_vote_count|add:publicpoll.choice2_vote_count }}</b></p>
-        <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice1 %}list-group-item-info{% endif %}">
+        <p>Total votes received: <b>{{ publicpoll.choice1_vote_count|add:publicpoll.choice2_vote_count|add:publicpoll.choice3_vote_count|add:publicpoll.choice4_vote_count }}</b></p>
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice1 %}list-group-item-info{% endif %}">
             1. {{publicpoll.choice1}}
             <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice1_vote_count}} votes</span>
         </li>
-        <li
-            class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice2 %}list-group-item-info{% endif %}">
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice2 %}list-group-item-info{% endif %}">
             2. {{publicpoll.choice2}}
             <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice2_vote_count}} votes</span>
         </li>
+        {% if publicpoll.choice3 != "" %}
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice3 %}list-group-item-info{% endif %}">
+            3. {{publicpoll.choice3}}
+            <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice3_vote_count}} votes</span>
+        </li>
+        {% endif %}
+        {% if publicpoll.choice4 != "" %}
+        <li class="list-group-item d-flex justify-content-between align-items-start {% if publicvote.choice == publicpoll.choice4 %}list-group-item-info{% endif %}">
+            4. {{publicpoll.choice4}}
+            <span class="badge bg-primary rounded-pill mx-2">{{publicpoll.choice4_vote_count}} votes</span>
+        </li>
+        {% endif %}
     </ul>
     <p>You have voted for <b>{{publicvote.choice|truncatechars:100}}</b></p>
     <div class="card h-100">
@@ -113,7 +123,9 @@
                 },
                 labels: [
                     'Choice 1',
-                    'Choice 2'
+                    'Choice 2',
+                    'Choice 3',
+                    'Choice 4'
                 ]
             },
             scaleY: {

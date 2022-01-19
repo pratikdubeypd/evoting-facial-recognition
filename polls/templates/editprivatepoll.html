@@ -31,6 +31,21 @@
                     <input type="text" class="form-control" id="choice2" name="choice2"
                         placeholder="{{privatepoll.choice2}}">
                 </div>
+                {% if privatepoll.choice3 != "" %}
+                <div class="col-md-6">
+                    <label for="choice3" class="form-label">Choice 3:</label>
+                    <input type="text" class="form-control" id="choice3" name="choice3"
+                        placeholder="{{privatepoll.choice3}}">
+                </div>
+                {% endif %}
+                {% if privatepoll.choice4 != "" %}
+                <div class="col-md-6">
+                    <label for="choice4" class="form-label">Choice 4:</label>
+                    <input type="text" class="form-control" id="choice4" name="choice4"
+                        placeholder="{{privatepoll.choice4}}">
+                </div>
+                {% endif %}
+                <p></p>
                 <div class="col-md-6">
                     <label class="form-label" for="endtime">Change when this poll should end?</label>
                     <br>
