@@ -21,6 +21,15 @@
                     <label for="desc" class="form-label">Describe the poll:</label>
                     <textarea class="form-control" id="desc" name="desc" rows="4"></textarea>
                 </div>
+                <div class="col-md-12">
+                    <label class="form-label" for="numberChoices">Please select the number of choices:</label>
+                    <b style="font-size: 12px;">(Note: You cannot edit this later.)</b>
+                    <select class="form-select" id="numberChoices" name="numberChoices">
+                        <option value="2" selected>2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                    </select>
+                </div>
                 <div class="col-md-6">
                     <label for="choice1" class="form-label">Choice 1:</label>
                     <input type="text" class="form-control" id="choice1" name="choice1" placeholder="Enter choice 1"
@@ -31,6 +40,8 @@
                     <input type="text" class="form-control" id="choice2" name="choice2" placeholder="Enter choice 2"
                         required>
                 </div>
+                <div class="col-md-6" id="ch3"></div>
+                <div class="col-md-6" id="ch4"></div>
                 <div class="col-md-6">
                     <label class="form-label" for="endtime">When should we end this poll?</label>
                     <br>
@@ -61,6 +72,20 @@
 
 {% block script %}
 <script>
+    ch = document.getElementById("numberChoices");
+    ch.addEventListener('change', function (){
+        if (ch.value == "3"){
+            document.getElementById("ch3").innerHTML = '<label for="choice3" class="form-label">Choice 3:</label> <input type="text" class="form-control" id="choice3" name="choice3" placeholder="Enter choice 3" required>';
+            document.getElementById("ch4").innerHTML = "";
+        }
+        else if (ch.value == "4"){
+            document.getElementById("ch4").innerHTML = '<label for="choice4" class="form-label">Choice 4:</label> <input type="text" class="form-control" id="choice4" name="choice4" placeholder="Enter choice 4" required>';
+        }
+        else if (ch.value == "2"){
+            document.getElementById("ch3").innerHTML = "";
+            document.getElementById("ch4").innerHTML = "";
+        }
+    });
     var checkbox = document.querySelector("input[name=privatepollchoice]");
 
     checkbox.addEventListener('change', function () {
